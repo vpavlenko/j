@@ -29,6 +29,16 @@ function App() {
     available: boolean;
   } | null>(null);
 
+  const [songParsingErrors, setSongParsingErrors] = useState<{
+    [key: string]: string[];
+  }>({});
+
+  const [hoverChord, setHoverChord] = useState<{
+    chord: string;
+    root: string;
+    suffix: string;
+  } | null>(null);
+
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
   };
@@ -269,6 +279,7 @@ function App() {
     if (suffix === "7alt") return "7#9";
     if (suffix === "") return "major";
     if (suffix === "m") return "minor";
+    if (suffix === "M") return "major";
     if (suffix === "M7") return "maj7";
     if (suffix === "M7#5") return "maj7#5";
     if (suffix === "M7b5") return "maj7b5";
@@ -302,6 +313,12 @@ function App() {
     if (suffix === "9#11") return "9#11";
     if (suffix === "13") return "13";
     if (suffix === "o7") return "dim7";
+    if (suffix === "+") return "aug";
+    if (suffix === "+7") return "aug7";
+    if (suffix === "7+") return "aug7";
+    if (suffix === "7sus") return "7sus4";
+    if (suffix === "o") return "dim";
+    if (suffix === "M6") return "6";
 
     return suffix;
   };
@@ -356,12 +373,39 @@ function App() {
       }
 
       setHoverInfo({ root, suffix, available });
+      setHoverChord({ chord: chordName, root, suffix });
     },
     [checkChordAvailability]
   );
 
   const handleChordLeave = useCallback(() => {
     setHoverInfo(null);
+    setHoverChord(null);
+  }, []);
+
+  useEffect(() => {
+    const errors: { [key: string]: string[] } = {};
+
+    CORPUS.forEach((song) => {
+      const songErrors: string[] = [];
+
+      song.chords.forEach((barChords) => {
+        barChords.forEach((chord) => {
+          chord.split(" ").forEach((chordName) => {
+            const [root, suffix] = parseChordName(chordName);
+            if (!checkChordAvailability(root, suffix)) {
+              songErrors.push(chordName);
+            }
+          });
+        });
+      });
+
+      if (songErrors.length > 0) {
+        errors[song.filename] = [...new Set(songErrors)]; // Remove duplicates
+      }
+    });
+
+    setSongParsingErrors(errors);
   }, []);
 
   return (
@@ -370,13 +414,44 @@ function App() {
       {!selectedSong ? (
         <ul>
           {CORPUS.map((song) => (
-            <li key={song.filename}>
+            <li
+              key={song.filename}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                marginBottom: "10px",
+              }}
+            >
               <a
                 href={`#${song.filename}`}
                 onClick={() => handleSongClick(song.filename)}
+                style={{
+                  color: songParsingErrors[song.filename] ? "red" : "inherit",
+                  marginRight: "10px",
+                }}
               >
                 {song.Title}
               </a>
+              {songParsingErrors[song.filename] && (
+                <div style={{ display: "flex", flexWrap: "wrap" }}>
+                  {songParsingErrors[song.filename].map((chord, index) => (
+                    <span
+                      key={index}
+                      onMouseEnter={() => handleChordHover(chord)}
+                      onMouseLeave={handleChordLeave}
+                      style={{
+                        backgroundColor: "#f0f0f0",
+                        padding: "2px 5px",
+                        margin: "0 2px",
+                        borderRadius: "3px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {chord}
+                    </span>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -438,6 +513,25 @@ function App() {
               )}
             </div>
           )}
+        </div>
+      )}
+      {hoverChord && (
+        <div
+          style={{
+            position: "fixed",
+            top: "10px",
+            right: "10px",
+            backgroundColor: "white",
+            border: "1px solid #ccc",
+            padding: "10px",
+            borderRadius: "5px",
+            boxShadow: "0 2px 5px rgba(0,0,0,0.1)",
+          }}
+        >
+          <h4>Chord Details</h4>
+          <p>Chord: {hoverChord.chord}</p>
+          <p>Root: {hoverChord.root}</p>
+          <p>Suffix: {hoverChord.suffix}</p>
         </div>
       )}
     </div>
