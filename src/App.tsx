@@ -15,9 +15,6 @@ interface ChordEvent {
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentChordIndex, setCurrentChordIndex] = useState<number | null>(
-    null
-  );
   const [chordSequence, setChordSequence] = useState<ChordEvent[]>([]);
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [sampler, setSampler] = useState<Tone.Sampler | null>(null);
@@ -32,6 +29,7 @@ function App() {
 
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
+    setDebugLogs([]); // Clear previous logs when selecting a new song
   };
 
   const selectedSongData = CORPUS.find(
@@ -48,17 +46,39 @@ function App() {
     let currentTime = 0;
 
     chords.forEach((barChords: string[]) => {
-      const chordNames = barChords.flatMap((chordStr) => chordStr.split(" "));
-      const numChordsInBar = chordNames.length;
-      const chordDuration = numerator / numChordsInBar;
+      const barChordNames = barChords.map((chordStr) => chordStr.split(" "));
 
-      chordNames.forEach((chord) => {
-        chordSequence.push({
-          chord: chord,
-          time: currentTime,
-          duration: chordDuration,
+      barChordNames.forEach((chordNames) => {
+        const numChordsInBar = chordNames.length;
+        const chordDuration = numerator / numChordsInBar;
+
+        setDebugLogs((prevLogs) => [
+          ...prevLogs,
+          `Chord names: ${chordNames.join(", ")}`,
+          `Number of chords in bar: ${numChordsInBar}`,
+          `Chord duration: ${chordDuration}`,
+        ]);
+
+        chordNames.forEach((chord) => {
+          // Adjust duration for chords that occupy the entire bar
+          const duration = chord.includes(" ")
+            ? chordDuration / 2
+            : chordDuration;
+
+          setDebugLogs((prevLogs) => [
+            ...prevLogs,
+            `Chord: ${chord}`,
+            `Time: ${currentTime}`,
+            `Duration: ${duration}`,
+          ]);
+
+          chordSequence.push({
+            chord: chord,
+            time: currentTime,
+            duration: duration,
+          });
+          currentTime += duration;
         });
-        currentTime += chordDuration;
       });
     });
 
@@ -149,7 +169,9 @@ function App() {
       }).toDestination();
       addDebugLog("Metronome synth created and connected to destination");
 
-      const secondsPerBeat = 60 / bpm;
+      const secondsPerBeat = 20 / bpm;
+      const secondsPerBar =
+        secondsPerBeat * (selectedSongData?.TimeSig[0] || 4);
 
       Tone.Transport.scheduleRepeat((time) => {
         metronome.triggerAttackRelease("C6", "8n", time);
@@ -158,8 +180,10 @@ function App() {
 
       chordSequence.forEach(({ chord, time, duration }, index) => {
         const midiNotes = getMidiNotesForChord(chord);
-        const chordTime = time * secondsPerBeat;
-        const chordDuration = duration * secondsPerBeat;
+        const chordTime =
+          (time / (selectedSongData?.TimeSig[0] || 4)) * secondsPerBar;
+        const chordDuration =
+          (duration / (selectedSongData?.TimeSig[0] || 4)) * secondsPerBar;
 
         Tone.Transport.schedule((playTime) => {
           if (midiNotes.length > 0) {
@@ -173,7 +197,6 @@ function App() {
             addDebugLog(`No valid notes for chord ${chord} at ${playTime}`);
           }
           Tone.Draw.schedule(() => {
-            setCurrentChordIndex(index);
             const { barIndex, chordIndex } = getBarAndChordIndex(index);
             setCurrentBarIndex(barIndex);
             setCurrentChordInBarIndex(chordIndex);
@@ -184,7 +207,7 @@ function App() {
 
       const totalTime =
         chordSequence.reduce((acc, { duration }) => acc + duration, 0) *
-        secondsPerBeat;
+        (secondsPerBar / (selectedSongData?.TimeSig[0] || 4));
 
       Tone.Transport.schedule(() => {
         handleStop();
@@ -202,7 +225,6 @@ function App() {
     return () => {
       Tone.Transport.stop();
       Tone.Transport.cancel();
-      setCurrentChordIndex(null);
       setCurrentBarIndex(null);
       setCurrentChordInBarIndex(null);
       addDebugLog(
@@ -218,7 +240,6 @@ function App() {
 
   const handleStop = () => {
     setIsPlaying(false);
-    setCurrentChordIndex(null);
   };
 
   function getMidiNotesForChord(chordName: string): number[] {
@@ -289,6 +310,12 @@ function App() {
     }
     return { barIndex: null, chordIndex: null };
   };
+
+  useEffect(() => {
+    if (debugLogRef.current) {
+      debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
+    }
+  }, [debugLogs]);
 
   return (
     <div className="App">
