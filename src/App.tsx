@@ -4,6 +4,7 @@ import { CORPUS } from "./tinyCorpus";
 import * as Tone from "tone";
 import { Song } from "./corpus";
 import guitarChords from "./guitarChords";
+import { strum } from "./utils"; // We'll create this utility function
 
 interface ChordEvent {
   chord: string;
@@ -157,13 +158,9 @@ function App() {
 
         Tone.Transport.schedule((playTime) => {
           if (midiNotes.length > 0) {
-            sampler.triggerAttackRelease(
-              midiNotes.map((midi) => Tone.Frequency(midi, "midi").toNote()),
-              chordDuration,
-              playTime
-            );
+            strum(sampler, midiNotes, chordDuration, playTime);
             addDebugLog(
-              `Chord ${chord} played at ${playTime}, duration: ${chordDuration}, notes: ${midiNotes.join(
+              `Chord ${chord} strummed at ${playTime}, duration: ${chordDuration}, notes: ${midiNotes.join(
                 ", "
               )}`
             );
