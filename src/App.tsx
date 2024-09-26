@@ -302,10 +302,13 @@ function App() {
     ) {
       const barChords = selectedSongData?.chords[barIndex] || [];
       for (let chordIndex = 0; chordIndex < barChords.length; chordIndex++) {
-        if (chordCount === linearIndex) {
-          return { barIndex, chordIndex };
+        const chordNames = barChords[chordIndex].split(" ");
+        for (let i = 0; i < chordNames.length; i++) {
+          if (chordCount === linearIndex) {
+            return { barIndex, chordIndex: i };
+          }
+          chordCount++;
         }
-        chordCount++;
       }
     }
     return { barIndex: null, chordIndex: null };
@@ -348,19 +351,21 @@ function App() {
                 {selectedSongData.chords.map((barChords, barIndex) => (
                   <div key={barIndex} className="chord-bar">
                     {barChords
-                      .map((chord, chordIndex) => (
-                        <span
-                          key={chordIndex}
-                          className={
-                            currentBarIndex === barIndex &&
-                            currentChordInBarIndex === chordIndex
-                              ? "chord highlight"
-                              : "chord"
-                          }
-                        >
-                          {chord}
-                        </span>
-                      ))
+                      .map((chord, chordIndex) =>
+                        chord.split(" ").map((chordName, i) => (
+                          <span
+                            key={`${chordIndex}-${i}`}
+                            className={
+                              currentBarIndex === barIndex &&
+                              currentChordInBarIndex === i
+                                ? "chord highlight"
+                                : "chord"
+                            }
+                          >
+                            {chordName}
+                          </span>
+                        ))
+                      )
                       .reduce((prev, curr) => (
                         <>
                           {prev} | {curr}
