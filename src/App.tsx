@@ -282,12 +282,52 @@ function App() {
       }
     }
 
-    // Handle special cases
-    if (suffix === "7alt") suffix = "7#9";
-    if (suffix === "") suffix = "major";
+    // Use the suffixMapping function to map the suffix
+    suffix = suffixMapping(suffix);
 
     return [root, suffix];
   }
+
+  const suffixMapping = (suffix: string): string => {
+    if (suffix === "7alt") return "7#9";
+    if (suffix === "") return "major";
+    if (suffix === "m") return "minor";
+    if (suffix === "M7") return "maj7";
+    if (suffix === "M7#5") return "maj7#5";
+    if (suffix === "M7b5") return "maj7b5";
+    if (suffix === "6/9") return "69";
+    if (suffix === "9b5") return "9b5";
+    if (suffix === "dim7") return "dim7";
+    if (suffix === "m7b5") return "m7b5";
+    if (suffix === "m/M7") return "mmaj7";
+    if (suffix === "mM7") return "mmaj7";
+    if (suffix === "m6/9") return "m69";
+    if (suffix.includes("/")) return suffix; // Allowing chord inversions to pass through
+    if (suffix.includes("sus")) return suffix; // Keeping all types of sus chords
+    if (suffix === "7b9") return "7b9";
+    if (suffix === "7#9") return "7#9";
+    if (suffix === "m7") return "m7";
+    if (suffix === "m9") return "m9";
+    if (suffix === "maj7") return "maj7";
+    if (suffix === "madd9") return "madd9";
+    if (suffix === "maj9") return "maj9";
+    if (suffix === "7b5") return "7b5";
+    if (suffix === "aug") return "aug";
+    if (suffix === "aug7") return "aug7";
+    if (suffix === "add9") return "add9";
+    if (suffix === "add11") return "add11";
+    if (suffix === "dim") return "dim";
+    if (suffix === "mmaj7b5") return "mmaj7b5";
+    if (suffix === "mmaj9") return "mmaj9";
+    if (suffix === "mmaj11") return "mmaj11";
+    if (suffix === "7sus4") return "7sus4";
+    if (suffix === "11") return "11";
+    if (suffix === "9#11") return "9#11";
+    if (suffix === "13") return "13";
+
+    // Default case: return the original suffix if it's not mapped
+    return suffix;
+  };
 
   useEffect(() => {
     if (debugLogRef.current) {
