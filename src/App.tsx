@@ -240,6 +240,7 @@ function App() {
     let suffix = "";
 
     const rootMapping: { [key: string]: string } = {
+      Cb: "B",
       Db: "Csharp",
       "D#": "Eb",
       "F#": "Fsharp",
@@ -288,12 +289,13 @@ function App() {
     if (suffix === "dim7") return "dim7";
     if (suffix === "m7b5") return "m7b5";
     if (suffix === "m/M7") return "mmaj7";
+    if (suffix === "mMaj7") return "mmaj7";
     if (suffix === "mM7") return "mmaj7";
     if (suffix === "m6/9") return "m69";
-    if (suffix.includes("/")) return suffix;
-    if (suffix.includes("sus")) return suffix;
     if (suffix === "7b9") return "7b9";
     if (suffix === "7#9") return "7#9";
+    if (suffix === "7#5") return "aug7";
+    if (suffix === "7#5#9") return "alt";
     if (suffix === "m7") return "m7";
     if (suffix === "m9") return "m9";
     if (suffix === "maj7") return "maj7";
@@ -317,8 +319,14 @@ function App() {
     if (suffix === "+7") return "aug7";
     if (suffix === "7+") return "aug7";
     if (suffix === "7sus") return "7sus4";
+    if (suffix === "9sus4") return "7sus4";
     if (suffix === "o") return "dim";
     if (suffix === "M6") return "6";
+    if (suffix === "7#11") return "9#11";
+    if (suffix === "M7#11") return "maj7b5";
+    if (suffix.includes("m7/")) return suffix.replace("m7/", "m/");
+    if (suffix.includes("/")) return suffix;
+    if (suffix.includes("sus")) return suffix;
 
     return suffix;
   };
