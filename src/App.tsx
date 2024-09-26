@@ -19,6 +19,7 @@ function App() {
   );
   const [chordSequence, setChordSequence] = useState<ChordEvent[]>([]);
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const [sampler, setSampler] = useState<Tone.Sampler | null>(null);
   const bpm = 120;
 
   const debugLogRef = useRef<HTMLDivElement>(null);
@@ -65,8 +66,53 @@ function App() {
     }
   }, [selectedSongData]);
 
+  const initializePiano = async () => {
+    const piano = new Tone.Sampler({
+      urls: {
+        A0: "A0.mp3",
+        C1: "C1.mp3",
+        "D#1": "Ds1.mp3",
+        "F#1": "Fs1.mp3",
+        A1: "A1.mp3",
+        C2: "C2.mp3",
+        "D#2": "Ds2.mp3",
+        "F#2": "Fs2.mp3",
+        A2: "A2.mp3",
+        C3: "C3.mp3",
+        "D#3": "Ds3.mp3",
+        "F#3": "Fs3.mp3",
+        A3: "A3.mp3",
+        C4: "C4.mp3",
+        "D#4": "Ds4.mp3",
+        "F#4": "Fs4.mp3",
+        A4: "A4.mp3",
+        C5: "C5.mp3",
+        "D#5": "Ds5.mp3",
+        "F#5": "Fs5.mp3",
+        A5: "A5.mp3",
+        C6: "C6.mp3",
+        "D#6": "Ds6.mp3",
+        "F#6": "Fs6.mp3",
+        A6: "A6.mp3",
+        C7: "C7.mp3",
+        "D#7": "Ds7.mp3",
+        "F#7": "Fs7.mp3",
+        A7: "A7.mp3",
+        C8: "C8.mp3",
+      },
+      release: 1,
+      baseUrl: "https://tonejs.github.io/audio/salamander/",
+    }).toDestination();
+
+    await Tone.loaded();
+    setSampler(piano);
+  };
+
   useEffect(() => {
-    let synth: Tone.PolySynth;
+    initializePiano();
+  }, []);
+
+  useEffect(() => {
     let metronome: Tone.Synth;
 
     const addDebugLog = (message: string) => {
@@ -86,8 +132,11 @@ function App() {
         `Tone.Transport.timeSignature set to ${Tone.Transport.timeSignature}`
       );
 
-      synth = new Tone.PolySynth().toDestination();
-      addDebugLog("Tone.PolySynth created and connected to destination");
+      if (!sampler) {
+        addDebugLog("Error: Piano sampler not initialized");
+        return;
+      }
+
       metronome = new Tone.Synth({
         oscillator: { type: "square" },
         envelope: { attack: 0, decay: 0, sustain: 0, release: 0.1 },
@@ -108,10 +157,8 @@ function App() {
 
         Tone.Transport.schedule((playTime) => {
           if (midiNotes.length > 0) {
-            synth.triggerAttackRelease(
-              midiNotes.map((midi) =>
-                Tone.Frequency(midi, "midi").toFrequency()
-              ), // Convert to Frequency
+            sampler.triggerAttackRelease(
+              midiNotes.map((midi) => Tone.Frequency(midi, "midi").toNote()),
               chordDuration,
               playTime
             );
@@ -143,7 +190,7 @@ function App() {
       addDebugLog("Tone.Transport.start() called");
     };
 
-    if (isPlaying) {
+    if (isPlaying && sampler) {
       playChords();
     }
 
@@ -155,7 +202,7 @@ function App() {
         "Cleanup: Transport stopped and cancelled, currentChordIndex reset"
       );
     };
-  }, [isPlaying, chordSequence, selectedSongData]);
+  }, [isPlaying, chordSequence, selectedSongData, sampler]);
 
   const handlePlay = () => {
     setIsPlaying(true);
