@@ -41,7 +41,9 @@ function App() {
               <p>Bars: {selectedSongData.Bars}</p>
               <h3>Chords:</h3>
               <pre>
-                {selectedSongData.chords.map((bar) => bar.join(" ")).join("\n")}
+                {selectedSongData.chords
+                  .map((bar) => bar.join(" | "))
+                  .join("\n")}
               </pre>
             </div>
           )}
