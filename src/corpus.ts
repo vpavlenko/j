@@ -1,4 +1,4 @@
-type Song = {
+export type Song = {
   filename: string;
   Title: string;
   ComposedBy: string;
