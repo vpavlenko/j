@@ -290,15 +290,23 @@ function App() {
               <p>Bars: {selectedSongData.Bars}</p>
               <h3>Chords:</h3>
               <div className="chords">
-                {chordSequence.map((chordEvent, index) => (
-                  <span
-                    key={index}
-                    className={
-                      currentChordIndex === index ? "chord highlight" : "chord"
-                    }
-                  >
-                    {chordEvent.chord}
-                  </span>
+                {selectedSongData.chords.map((barChords, barIndex) => (
+                  <div key={barIndex} className="chord-bar">
+                    {barChords
+                      .map((chord, chordIndex) => (
+                        <span
+                          key={chordIndex}
+                          className={
+                            currentChordIndex === chordIndex
+                              ? "chord highlight"
+                              : "chord"
+                          }
+                        >
+                          {chord}
+                        </span>
+                      ))
+                      .reduce((prev, curr) => [prev, " | ", curr])}
+                  </div>
                 ))}
               </div>
               {!isPlaying ? (

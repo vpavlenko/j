@@ -39,3 +39,18 @@
 .read-the-docs {
   color: #888;
 }
+
+.chord-bar {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.chord {
+    margin-right: 5px;
+}
+
+.highlight {
+    background-color: yellow;
+    font-weight: bold;
+}
