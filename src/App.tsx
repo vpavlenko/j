@@ -350,9 +350,10 @@ function App() {
               <div className="chords">
                 {selectedSongData.chords.map((barChords, barIndex) => (
                   <div key={barIndex} className="chord-bar">
-                    {barChords
-                      .map((chord, chordIndex) =>
-                        chord.split(" ").map((chordName, i) => (
+                    {barChords.map((chord, chordIndex) => (
+                      <React.Fragment key={`${barIndex}-${chordIndex}`}>
+                        {chordIndex > 0 && " | "}
+                        {chord.split(" ").map((chordName, i) => (
                           <span
                             key={`${chordIndex}-${i}`}
                             className={
@@ -364,13 +365,9 @@ function App() {
                           >
                             {chordName}
                           </span>
-                        ))
-                      )
-                      .reduce((prev, curr) => (
-                        <>
-                          {prev} | {curr}
-                        </>
-                      ))}
+                        ))}
+                      </React.Fragment>
+                    ))}
                   </div>
                 ))}
               </div>
