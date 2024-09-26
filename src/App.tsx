@@ -256,7 +256,7 @@ function App() {
     }
 
     // Handle special cases
-    if (suffix === "7alt") suffix = "7#5#9";
+    if (suffix === "7alt") suffix = "7#9";
     if (suffix === "") suffix = "major";
 
     return [root, suffix];
