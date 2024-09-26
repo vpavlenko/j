@@ -229,11 +229,32 @@ function App() {
     let root = "";
     let suffix = "";
 
-    for (let i = 0; i < keys.length; i++) {
-      if (chordName.startsWith(keys[i])) {
-        root = keys[i];
-        suffix = chordName.slice(keys[i].length);
+    const rootMapping: { [key: string]: string } = {
+      Db: "Csharp",
+      "D#": "Eb",
+      Gb: "Fsharp",
+      "G#": "Ab",
+      "A#": "Bb",
+      "C#": "Csharp",
+    };
+
+    // First, check for keys that need to be mapped
+    for (const [originalRoot, mappedRoot] of Object.entries(rootMapping)) {
+      if (chordName.startsWith(originalRoot)) {
+        root = mappedRoot;
+        suffix = chordName.slice(originalRoot.length);
         break;
+      }
+    }
+
+    // If no mapped key was found, then check the standard keys
+    if (!root) {
+      for (let i = 0; i < keys.length; i++) {
+        if (chordName.startsWith(keys[i])) {
+          root = keys[i];
+          suffix = chordName.slice(keys[i].length);
+          break;
+        }
       }
     }
 
@@ -243,6 +264,7 @@ function App() {
   }
 
   const suffixMapping = (suffix: string): string => {
+    if (suffix === "7") return "7";
     if (suffix === "7alt") return "7#9";
     if (suffix === "") return "major";
     if (suffix === "m") return "minor";
@@ -283,6 +305,9 @@ function App() {
   };
 
   const checkChordAvailability = useCallback((root: string, suffix: string) => {
+    console.log(
+      `Checking availability for root: "${root}", suffix: "${suffix}"`
+    );
     const chordData = guitarChords.chords[root]?.find(
       (chord) => chord.suffix === suffix
     );
@@ -291,8 +316,43 @@ function App() {
 
   const handleChordHover = useCallback(
     (chordName: string) => {
+      console.log(`Original chord name: ${chordName}`);
+
       const [root, suffix] = parseChordName(chordName);
+      console.log(
+        `Parsed chord: ${chordName} -> root: ${root}, suffix: ${suffix}`
+      );
+
       const available = checkChordAvailability(root, suffix);
+      console.log(`Availability for ${root}${suffix}: ${available}`);
+
+      if (!available) {
+        console.log(`Debugging unavailable chord:`);
+        console.log(
+          `- Checking root "${root}" in guitarChords:`,
+          !!guitarChords.chords[root]
+        );
+
+        if (guitarChords.chords[root]) {
+          console.log(
+            `- Available suffixes for ${root}:`,
+            guitarChords.chords[root].map((chord) => chord.suffix)
+          );
+          console.log(
+            `- Closest matching suffixes:`,
+            guitarChords.chords[root]
+              .map((chord) => ({
+                suffix: chord.suffix,
+                similarity: stringSimilarity(suffix, chord.suffix),
+              }))
+              .sort((a, b) => b.similarity - a.similarity)
+              .slice(0, 3)
+          );
+        } else {
+          console.log(`- Available roots:`, Object.keys(guitarChords.chords));
+        }
+      }
+
       setHoverInfo({ root, suffix, available });
     },
     [checkChordAvailability]
@@ -402,6 +462,41 @@ function getLinearIndex(
     linearIndex += chordNames.length;
   }
   return linearIndex + chordNameIndex;
+}
+
+function stringSimilarity(s1: string, s2: string): number {
+  const longer = s1.length > s2.length ? s1 : s2;
+  const shorter = s1.length > s2.length ? s2 : s1;
+  const longerLength = longer.length;
+  if (longerLength === 0) {
+    return 1.0;
+  }
+  return (longerLength - editDistance(longer, shorter)) / longerLength;
+}
+
+function editDistance(s1: string, s2: string): number {
+  s1 = s1.toLowerCase();
+  s2 = s2.toLowerCase();
+  const costs = [];
+  for (let i = 0; i <= s1.length; i++) {
+    let lastValue = i;
+    for (let j = 0; j <= s2.length; j++) {
+      if (i === 0) {
+        costs[j] = j;
+      } else if (j > 0) {
+        let newValue = costs[j - 1];
+        if (s1.charAt(i - 1) !== s2.charAt(j - 1)) {
+          newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+        }
+        costs[j - 1] = lastValue;
+        lastValue = newValue;
+      }
+    }
+    if (i > 0) {
+      costs[s2.length] = lastValue;
+    }
+  }
+  return costs[s2.length];
 }
 
 export default App;
