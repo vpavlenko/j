@@ -22,10 +22,9 @@ function App() {
 
   const debugLogRef = useRef<HTMLDivElement>(null);
 
-  const [currentBarIndex, setCurrentBarIndex] = useState<number | null>(null);
-  const [currentChordInBarIndex, setCurrentChordInBarIndex] = useState<
-    number | null
-  >(null);
+  const [currentChordIndex, setCurrentChordIndex] = useState<number | null>(
+    null
+  );
 
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
@@ -197,9 +196,7 @@ function App() {
             addDebugLog(`No valid notes for chord ${chord} at ${playTime}`);
           }
           Tone.Draw.schedule(() => {
-            const { barIndex, chordIndex } = getBarAndChordIndex(index);
-            setCurrentBarIndex(barIndex);
-            setCurrentChordInBarIndex(chordIndex);
+            setCurrentChordIndex(index);
             addDebugLog(`Current chord index set to ${index} at ${playTime}`);
           }, playTime);
         }, chordTime);
@@ -225,8 +222,7 @@ function App() {
     return () => {
       Tone.Transport.stop();
       Tone.Transport.cancel();
-      setCurrentBarIndex(null);
-      setCurrentChordInBarIndex(null);
+      setCurrentChordIndex(null);
       addDebugLog(
         "Cleanup: Transport stopped and cancelled, currentChordIndex reset"
       );
@@ -293,27 +289,6 @@ function App() {
     return [root, suffix];
   }
 
-  const getBarAndChordIndex = (linearIndex: number) => {
-    let chordCount = 0;
-    for (
-      let barIndex = 0;
-      barIndex < (selectedSongData?.chords.length || 0);
-      barIndex++
-    ) {
-      const barChords = selectedSongData?.chords[barIndex] || [];
-      for (let chordIndex = 0; chordIndex < barChords.length; chordIndex++) {
-        const chordNames = barChords[chordIndex].split(" ");
-        for (let i = 0; i < chordNames.length; i++) {
-          if (chordCount === linearIndex) {
-            return { barIndex, chordIndex: i };
-          }
-          chordCount++;
-        }
-      }
-    }
-    return { barIndex: null, chordIndex: null };
-  };
-
   useEffect(() => {
     if (debugLogRef.current) {
       debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
@@ -353,19 +328,26 @@ function App() {
                     {barChords.map((chord, chordIndex) => (
                       <React.Fragment key={`${barIndex}-${chordIndex}`}>
                         {chordIndex > 0 && " | "}
-                        {chord.split(" ").map((chordName, i) => (
-                          <span
-                            key={`${chordIndex}-${i}`}
-                            className={
-                              currentBarIndex === barIndex &&
-                              currentChordInBarIndex === i
-                                ? "chord highlight"
-                                : "chord"
-                            }
-                          >
-                            {chordName}
-                          </span>
-                        ))}
+                        {chord.split(" ").map((chordName, i) => {
+                          const linearIndex = getLinearIndex(
+                            barIndex,
+                            chordIndex,
+                            i,
+                            selectedSongData
+                          );
+                          return (
+                            <span
+                              key={`${chordIndex}-${i}`}
+                              className={
+                                currentChordIndex === linearIndex
+                                  ? "chord highlight"
+                                  : "chord"
+                              }
+                            >
+                              {chordName}
+                            </span>
+                          );
+                        })}
                       </React.Fragment>
                     ))}
                   </div>
@@ -388,6 +370,28 @@ function App() {
       )}
     </div>
   );
+}
+
+function getLinearIndex(
+  barIndex: number,
+  chordIndex: number,
+  chordNameIndex: number,
+  songData: Song
+): number {
+  let linearIndex = 0;
+  for (let i = 0; i < barIndex; i++) {
+    const barChords = songData.chords[i] || [];
+    for (let j = 0; j < barChords.length; j++) {
+      const chordNames = barChords[j].split(" ");
+      linearIndex += chordNames.length;
+    }
+  }
+  const currentBarChords = songData.chords[barIndex] || [];
+  for (let j = 0; j < chordIndex; j++) {
+    const chordNames = currentBarChords[j].split(" ");
+    linearIndex += chordNames.length;
+  }
+  return linearIndex + chordNameIndex;
 }
 
 export default App;
