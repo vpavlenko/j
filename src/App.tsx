@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
-import { CORPUS } from "./tinyCorpus";
+import { CORPUS } from "./corpus";
 import * as Tone from "tone";
 import { Song } from "./corpus";
 import guitarChords from "./guitarChords";
@@ -232,6 +232,7 @@ function App() {
     const rootMapping: { [key: string]: string } = {
       Db: "Csharp",
       "D#": "Eb",
+      "F#": "Fsharp",
       Gb: "Fsharp",
       "G#": "Ab",
       "A#": "Bb",
@@ -300,6 +301,7 @@ function App() {
     if (suffix === "11") return "11";
     if (suffix === "9#11") return "9#11";
     if (suffix === "13") return "13";
+    if (suffix === "o7") return "dim7";
 
     return suffix;
   };
