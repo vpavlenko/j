@@ -25,6 +25,11 @@ function App() {
 
   const debugLogRef = useRef<HTMLDivElement>(null);
 
+  const [currentBarIndex, setCurrentBarIndex] = useState<number | null>(null);
+  const [currentChordInBarIndex, setCurrentChordInBarIndex] = useState<
+    number | null
+  >(null);
+
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
   };
@@ -169,6 +174,9 @@ function App() {
           }
           Tone.Draw.schedule(() => {
             setCurrentChordIndex(index);
+            const { barIndex, chordIndex } = getBarAndChordIndex(index);
+            setCurrentBarIndex(barIndex);
+            setCurrentChordInBarIndex(chordIndex);
             addDebugLog(`Current chord index set to ${index} at ${playTime}`);
           }, playTime);
         }, chordTime);
@@ -195,6 +203,8 @@ function App() {
       Tone.Transport.stop();
       Tone.Transport.cancel();
       setCurrentChordIndex(null);
+      setCurrentBarIndex(null);
+      setCurrentChordInBarIndex(null);
       addDebugLog(
         "Cleanup: Transport stopped and cancelled, currentChordIndex reset"
       );
@@ -262,6 +272,24 @@ function App() {
     return [root, suffix];
   }
 
+  const getBarAndChordIndex = (linearIndex: number) => {
+    let chordCount = 0;
+    for (
+      let barIndex = 0;
+      barIndex < (selectedSongData?.chords.length || 0);
+      barIndex++
+    ) {
+      const barChords = selectedSongData?.chords[barIndex] || [];
+      for (let chordIndex = 0; chordIndex < barChords.length; chordIndex++) {
+        if (chordCount === linearIndex) {
+          return { barIndex, chordIndex };
+        }
+        chordCount++;
+      }
+    }
+    return { barIndex: null, chordIndex: null };
+  };
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
@@ -297,7 +325,8 @@ function App() {
                         <span
                           key={chordIndex}
                           className={
-                            currentChordIndex === chordIndex
+                            currentBarIndex === barIndex &&
+                            currentChordInBarIndex === chordIndex
                               ? "chord highlight"
                               : "chord"
                           }
