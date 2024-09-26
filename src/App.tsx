@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import { CORPUS } from "./tinyCorpus";
 import * as Tone from "tone";
@@ -22,6 +22,12 @@ function App() {
   const [currentChordIndex, setCurrentChordIndex] = useState<number | null>(
     null
   );
+
+  const [hoverInfo, setHoverInfo] = useState<{
+    root: string;
+    suffix: string;
+    available: boolean;
+  } | null>(null);
 
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
@@ -276,6 +282,26 @@ function App() {
     return suffix;
   };
 
+  const checkChordAvailability = useCallback((root: string, suffix: string) => {
+    const chordData = guitarChords.chords[root]?.find(
+      (chord) => chord.suffix === suffix
+    );
+    return !!chordData;
+  }, []);
+
+  const handleChordHover = useCallback(
+    (chordName: string) => {
+      const [root, suffix] = parseChordName(chordName);
+      const available = checkChordAvailability(root, suffix);
+      setHoverInfo({ root, suffix, available });
+    },
+    [checkChordAvailability]
+  );
+
+  const handleChordLeave = useCallback(() => {
+    setHoverInfo(null);
+  }, []);
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
@@ -324,6 +350,8 @@ function App() {
                                   ? "chord highlight"
                                   : "chord"
                               }
+                              onMouseEnter={() => handleChordHover(chordName)}
+                              onMouseLeave={handleChordLeave}
                             >
                               {chordName}
                             </span>
@@ -334,6 +362,13 @@ function App() {
                   </div>
                 ))}
               </div>
+              {hoverInfo && (
+                <div className="chord-info">
+                  <p>Root: {hoverInfo.root}</p>
+                  <p>Suffix: {hoverInfo.suffix}</p>
+                  <p>Available: {hoverInfo.available ? "Yes" : "No"}</p>
+                </div>
+              )}
               {!isPlaying ? (
                 <button onClick={handlePlay}>Play</button>
               ) : (
