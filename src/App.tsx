@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import { CORPUS } from "./tinyCorpus";
 import * as Tone from "tone";
 import { Song } from "./corpus";
 import guitarChords from "./guitarChords";
-import { strum } from "./utils"; // We'll create this utility function
+import { strum } from "./utils";
 
 interface ChordEvent {
   chord: string;
@@ -16,11 +16,8 @@ function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [chordSequence, setChordSequence] = useState<ChordEvent[]>([]);
-  const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [sampler, setSampler] = useState<Tone.Sampler | null>(null);
   const bpm = 120;
-
-  const debugLogRef = useRef<HTMLDivElement>(null);
 
   const [currentChordIndex, setCurrentChordIndex] = useState<number | null>(
     null
@@ -28,7 +25,6 @@ function App() {
 
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
-    setDebugLogs([]); // Clear previous logs when selecting a new song
   };
 
   const selectedSongData = CORPUS.find(
@@ -51,25 +47,10 @@ function App() {
         const numChordsInBar = chordNames.length;
         const chordDuration = numerator / numChordsInBar;
 
-        setDebugLogs((prevLogs) => [
-          ...prevLogs,
-          `Chord names: ${chordNames.join(", ")}`,
-          `Number of chords in bar: ${numChordsInBar}`,
-          `Chord duration: ${chordDuration}`,
-        ]);
-
         chordNames.forEach((chord) => {
-          // Adjust duration for chords that occupy the entire bar
           const duration = chord.includes(" ")
             ? chordDuration / 2
             : chordDuration;
-
-          setDebugLogs((prevLogs) => [
-            ...prevLogs,
-            `Chord: ${chord}`,
-            `Time: ${currentTime}`,
-            `Duration: ${duration}`,
-          ]);
 
           chordSequence.push({
             chord: chord,
@@ -140,25 +121,12 @@ function App() {
   useEffect(() => {
     let metronome: Tone.Synth;
 
-    const addDebugLog = (message: string) => {
-      setDebugLogs((prevLogs) => [...prevLogs, message]);
-      if (debugLogRef.current) {
-        debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
-      }
-    };
-
     const playChords = async () => {
       await Tone.start();
-      addDebugLog("Tone.start() called");
       Tone.Transport.bpm.value = bpm;
-      addDebugLog(`Tone.Transport.bpm set to ${bpm}`);
       Tone.Transport.timeSignature = selectedSongData?.TimeSig || [4, 4];
-      addDebugLog(
-        `Tone.Transport.timeSignature set to ${Tone.Transport.timeSignature}`
-      );
 
       if (!sampler) {
-        addDebugLog("Error: Piano sampler not initialized");
         return;
       }
 
@@ -166,7 +134,6 @@ function App() {
         oscillator: { type: "square" },
         envelope: { attack: 0, decay: 0, sustain: 0, release: 0.1 },
       }).toDestination();
-      addDebugLog("Metronome synth created and connected to destination");
 
       const secondsPerBeat = 20 / bpm;
       const secondsPerBar =
@@ -174,7 +141,6 @@ function App() {
 
       Tone.Transport.scheduleRepeat((time) => {
         metronome.triggerAttackRelease("C6", "8n", time);
-        addDebugLog(`Metronome triggered at ${time}`);
       }, secondsPerBeat);
 
       chordSequence.forEach(({ chord, time, duration }, index) => {
@@ -187,17 +153,9 @@ function App() {
         Tone.Transport.schedule((playTime) => {
           if (midiNotes.length > 0) {
             strum(sampler, midiNotes, chordDuration, playTime);
-            addDebugLog(
-              `Chord ${chord} strummed at ${playTime}, duration: ${chordDuration}, notes: ${midiNotes.join(
-                ", "
-              )}`
-            );
-          } else {
-            addDebugLog(`No valid notes for chord ${chord} at ${playTime}`);
           }
           Tone.Draw.schedule(() => {
             setCurrentChordIndex(index);
-            addDebugLog(`Current chord index set to ${index} at ${playTime}`);
           }, playTime);
         }, chordTime);
       });
@@ -208,11 +166,9 @@ function App() {
 
       Tone.Transport.schedule(() => {
         handleStop();
-        addDebugLog("Playback completed, stopping transport");
       }, totalTime);
 
       Tone.Transport.start();
-      addDebugLog("Tone.Transport.start() called");
     };
 
     if (isPlaying && sampler) {
@@ -223,15 +179,11 @@ function App() {
       Tone.Transport.stop();
       Tone.Transport.cancel();
       setCurrentChordIndex(null);
-      addDebugLog(
-        "Cleanup: Transport stopped and cancelled, currentChordIndex reset"
-      );
     };
   }, [isPlaying, chordSequence, selectedSongData, sampler]);
 
   const handlePlay = () => {
     setIsPlaying(true);
-    setDebugLogs([]); // Clear previous logs when starting new playback
   };
 
   const handleStop = () => {
@@ -249,19 +201,17 @@ function App() {
       return [];
     }
 
-    // Get the first position of the chord (you might want to randomize this or use a specific position)
     const position = chordData.positions[0];
 
     if (position.midi) {
       return position.midi;
     } else {
-      // If midi property is not available, calculate it based on frets and tuning
       const tuning = guitarChords.tunings.standard.map((note) =>
         Tone.Frequency(note).toMidi()
       );
       return position.frets
         .map((fret, index) => {
-          if (fret === -1) return -1; // Muted string
+          if (fret === -1) return -1;
           return tuning[index] + fret + position.baseFret - 1;
         })
         .filter((note) => note !== -1);
@@ -273,7 +223,6 @@ function App() {
     let root = "";
     let suffix = "";
 
-    // Find the root
     for (let i = 0; i < keys.length; i++) {
       if (chordName.startsWith(keys[i])) {
         root = keys[i];
@@ -282,7 +231,6 @@ function App() {
       }
     }
 
-    // Use the suffixMapping function to map the suffix
     suffix = suffixMapping(suffix);
 
     return [root, suffix];
@@ -302,8 +250,8 @@ function App() {
     if (suffix === "m/M7") return "mmaj7";
     if (suffix === "mM7") return "mmaj7";
     if (suffix === "m6/9") return "m69";
-    if (suffix.includes("/")) return suffix; // Allowing chord inversions to pass through
-    if (suffix.includes("sus")) return suffix; // Keeping all types of sus chords
+    if (suffix.includes("/")) return suffix;
+    if (suffix.includes("sus")) return suffix;
     if (suffix === "7b9") return "7b9";
     if (suffix === "7#9") return "7#9";
     if (suffix === "m7") return "m7";
@@ -325,15 +273,8 @@ function App() {
     if (suffix === "9#11") return "9#11";
     if (suffix === "13") return "13";
 
-    // Default case: return the original suffix if it's not mapped
     return suffix;
   };
-
-  useEffect(() => {
-    if (debugLogRef.current) {
-      debugLogRef.current.scrollTop = debugLogRef.current.scrollHeight;
-    }
-  }, [debugLogs]);
 
   return (
     <div className="App">
@@ -398,12 +339,6 @@ function App() {
               ) : (
                 <button onClick={handleStop}>Stop</button>
               )}
-              <div className="debug-log" ref={debugLogRef}>
-                <h3>Debug Log:</h3>
-                {debugLogs.map((log, index) => (
-                  <p key={index}>{log}</p>
-                ))}
-              </div>
             </div>
           )}
         </div>
