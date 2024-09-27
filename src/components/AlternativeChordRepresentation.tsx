@@ -84,7 +84,14 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       {/* Third repetition - with root difference numbers */}
       <div style={{ marginTop: "150px", position: "relative" }}>
         {parsedChords.map((chordInfo, index) => (
-          <React.Fragment key={`category-third-${index}`}>
+          <div
+            key={`category-third-${index}`}
+            style={{
+              display: "inline-block",
+              width: "40px",
+              position: "relative",
+            }}
+          >
             <span
               className={
                 currentChordIndex === index ? "chord highlight" : "chord"
@@ -94,7 +101,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               style={{
                 display: "inline-block",
                 width: "30px",
-                margin: "0 5px",
                 cursor: "pointer",
                 position: "relative",
                 top: chordInfo.isMinor
@@ -109,12 +115,13 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             {index < parsedChords.length - 1 && (
               <span
                 style={{
-                  display: "inline-block",
-                  width: "15px",
+                  position: "absolute",
+                  //   right: "30px",
+
+                  transform: "translate(-140%, 30%)",
                   fontSize: "0.7em",
                   color: "red",
-                  position: "relative",
-                  top: "0",
+                  zIndex: 1,
                 }}
               >
                 {getRootDifference(
@@ -123,7 +130,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 )}
               </span>
             )}
-          </React.Fragment>
+          </div>
         ))}
       </div>
     </div>
