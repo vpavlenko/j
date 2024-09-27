@@ -116,8 +116,57 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               <span
                 style={{
                   position: "absolute",
-                  //   right: "30px",
+                  transform: "translate(-140%, 30%)",
+                  fontSize: "0.7em",
+                  color: "red",
+                  zIndex: 1,
+                }}
+              >
+                {getRootDifference(
+                  chordInfo.root,
+                  parsedChords[index + 1].root
+                )}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
 
+      {/* Fourth repetition - only suffixes with root difference numbers */}
+      <div style={{ marginTop: "150px", position: "relative" }}>
+        {parsedChords.map((chordInfo, index) => (
+          <div
+            key={`category-fourth-${index}`}
+            style={{
+              display: "inline-block",
+              width: "40px",
+              position: "relative",
+            }}
+          >
+            <span
+              className={
+                currentChordIndex === index ? "chord highlight" : "chord"
+              }
+              onMouseEnter={() => handleChordHover(chordInfo.chord)}
+              onMouseLeave={handleChordLeave}
+              style={{
+                display: "inline-block",
+                width: "30px",
+                cursor: "pointer",
+                position: "relative",
+                top: chordInfo.isMinor
+                  ? "-30px"
+                  : chordInfo.isMajor
+                  ? "30px"
+                  : "0",
+              }}
+            >
+              {chordInfo.suffix || ""}
+            </span>
+            {index < parsedChords.length - 1 && (
+              <span
+                style={{
+                  position: "absolute",
                   transform: "translate(-140%, 30%)",
                   fontSize: "0.7em",
                   color: "red",
