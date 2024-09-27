@@ -42,6 +42,7 @@ const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
 
 const ChordRoot = styled.div`
   font-weight: normal;
+  color: gray;
 `;
 
 const ChordSuffix = styled.div`
@@ -152,21 +153,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
           {parsedChords.map((chordInfo, index) => (
             <TwoLineChord
               key={`line-1-${index}`}
-              chord={chordInfo.chord}
-              root={chordInfo.originalRoot}
-              suffix={chordInfo.originalSuffix}
-              highlight={currentChordIndex === index}
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-            />
-          ))}
-        </ChordLine>
-
-        {/* Duplicate of first repetition */}
-        <ChordLine style={{ marginTop: "50px" }}>
-          {parsedChords.map((chordInfo, index) => (
-            <TwoLineChord
-              key={`line-1b-${index}`}
               chord={chordInfo.chord}
               root={chordInfo.originalRoot}
               suffix={chordInfo.originalSuffix}
