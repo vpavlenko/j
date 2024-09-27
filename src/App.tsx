@@ -388,11 +388,12 @@ function App() {
                 <button onClick={togglePlay}>
                   {isPlaying ? "Stop" : "Play"}
                 </button>
-                <p>Composed by: {selectedSongData.ComposedBy}</p>
-                <p>Key: {selectedSongData.DBKeySig}</p>
-                <p>Time Signature: {selectedSongData.TimeSig.join("/")}</p>
-                <p>Bars: {selectedSongData.Bars}</p>
-                <h3>Chords:</h3>
+                <p>{selectedSongData.ComposedBy}</p>
+                <p>
+                  {selectedSongData.DBKeySig},{" "}
+                  {selectedSongData.TimeSig.join("/")}, {selectedSongData.Bars}{" "}
+                  bars
+                </p>
                 <div
                   className="chords"
                   onMouseEnter={() => setIsHoveringChords(true)}
@@ -419,7 +420,7 @@ function App() {
                                     : "chord"
                                 }
                               >
-                                {chordName}
+                                {chordName}&nbsp;
                               </span>
                             );
                           })}

@@ -28,6 +28,7 @@ const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
   cursor: pointer;
   position: relative;
   top: ${(props) => props.top || "0"};
+  line-height: 0.9;
   ${(props) =>
     props.highlight &&
     `
@@ -47,7 +48,7 @@ const ChordSuffix = styled.div`
 
 const RootDifference = styled.span`
   position: absolute;
-  transform: translate(-140%, 30%);
+  transform: translate(-300%, 30%);
   font-size: 0.7em;
   color: red;
   z-index: 1;
@@ -117,7 +118,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               key={`line-1-${index}`}
               chord={chordInfo.chord}
               root={chordInfo.root}
-              suffix={chordInfo.originalSuffix || "."} // Use originalSuffix here
+              suffix={chordInfo.originalSuffix || "M"} // Use originalSuffix here
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
@@ -196,7 +197,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
                 }
               >
-                {chordInfo.originalSuffix || "."}{" "}
+                {chordInfo.originalSuffix || "M"}{" "}
                 {/* Use originalSuffix here */}
               </ChordSpan>
               {index < parsedChords.length - 1 && (
