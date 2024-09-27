@@ -51,7 +51,7 @@ const ChordSuffix = styled.div`
 
 const RootDifference = styled.span`
   position: absolute;
-  transform: translate(-300%, 30%);
+  transform: translate(-200%, 30%);
   font-size: 0.7em;
   color: red;
   font-weight: bold;

@@ -42,5 +42,6 @@ export function getRootDifference(root1: string, root2: string): number {
     difference += 12; // Ensure positive difference
   }
 
-  return difference;
+  // Map the result from 0..11 to -5..+6
+  return difference <= 6 ? difference : difference - 12;
 }
