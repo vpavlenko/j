@@ -61,11 +61,6 @@
   margin-bottom: 5px;
 }
 
-.chord-categories {
-  display: flex;
-  flex-direction: column;
-}
-
 .minor-chords,
 .dominant-chords,
 .major-chords {

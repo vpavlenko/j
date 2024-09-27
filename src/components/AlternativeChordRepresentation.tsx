@@ -50,95 +50,31 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
           </span>
         ))}
       </div>
-      <div
-        className="chord-categories"
-        style={{ position: "relative", height: "3em" }}
-      >
-        <div
-          className="minor-chords"
-          style={{ position: "absolute", top: 0, left: 0, right: 0 }}
-        >
-          {parsedChords.map((chordInfo, index) => (
-            <span
-              key={`minor-${index}`}
-              className={
-                currentChordIndex === index && chordInfo.isMinor
-                  ? "chord highlight"
-                  : "chord"
-              }
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-              style={{
-                display: "inline-block",
-                width: "10px",
-                margin: "0 5px",
-                cursor: "pointer",
-                visibility: chordInfo.isMinor ? "visible" : "hidden",
-              }}
-            >
-              {chordInfo.isMinor ? chordInfo.chord : "\u00A0"}
-            </span>
-          ))}
-        </div>
-        <div
-          className="dominant-chords"
-          style={{ position: "absolute", top: "1em", left: 0, right: 0 }}
-        >
-          {parsedChords.map((chordInfo, index) => (
-            <span
-              key={`dominant-${index}`}
-              className={
-                currentChordIndex === index &&
-                !chordInfo.isMajor &&
-                !chordInfo.isMinor
-                  ? "chord highlight"
-                  : "chord"
-              }
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-              style={{
-                display: "inline-block",
-                width: "10px",
-                margin: "0 5px",
-                cursor: "pointer",
-                visibility:
-                  !chordInfo.isMajor && !chordInfo.isMinor
-                    ? "visible"
-                    : "hidden",
-              }}
-            >
-              {!chordInfo.isMajor && !chordInfo.isMinor
-                ? chordInfo.chord
-                : "\u00A0"}
-            </span>
-          ))}
-        </div>
-        <div
-          className="major-chords"
-          style={{ position: "absolute", top: "2em", left: 0, right: 0 }}
-        >
-          {parsedChords.map((chordInfo, index) => (
-            <span
-              key={`major-${index}`}
-              className={
-                currentChordIndex === index && chordInfo.isMajor
-                  ? "chord highlight"
-                  : "chord"
-              }
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-              style={{
-                display: "inline-block",
-                width: "10px",
-                margin: "0 5px",
-                cursor: "pointer",
-                visibility: chordInfo.isMajor ? "visible" : "hidden",
-              }}
-            >
-              {chordInfo.isMajor ? chordInfo.chord : "\u00A0"}
-            </span>
-          ))}
-        </div>
+      <div style={{ marginTop: "50px" }}>
+        {parsedChords.map((chordInfo, index) => (
+          <span
+            key={`category-${index}`}
+            className={
+              currentChordIndex === index ? "chord highlight" : "chord"
+            }
+            onMouseEnter={() => handleChordHover(chordInfo.chord)}
+            onMouseLeave={handleChordLeave}
+            style={{
+              display: "inline",
+              width: "10px",
+              margin: "0 5px",
+              cursor: "pointer",
+              position: "relative",
+              top: chordInfo.isMinor
+                ? "-30px"
+                : chordInfo.isMajor
+                ? "30px"
+                : "0",
+            }}
+          >
+            {chordInfo.chord}
+          </span>
+        ))}
       </div>
     </div>
   );
