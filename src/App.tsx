@@ -383,6 +383,8 @@ function App() {
   const renderSongList = () => {
     const songsByChordCount: { [key: number]: Song[] } = {};
     const songsWithErrors: Song[] = [];
+    let tracksWithAllChordsParsed = 0;
+    let tracksWithParsingErrors = 0;
 
     CORPUS.forEach((song) => {
       const stats = songStats[song.filename] || {
@@ -393,7 +395,9 @@ function App() {
 
       if (hasErrors) {
         songsWithErrors.push(song);
+        tracksWithParsingErrors++;
       } else {
+        tracksWithAllChordsParsed++;
         const chordCount = stats.distinctChords;
         if (!songsByChordCount[chordCount]) {
           songsByChordCount[chordCount] = [];
@@ -403,63 +407,73 @@ function App() {
     });
 
     return (
-      <SongListContainer>
-        {Object.entries(songsByChordCount)
-          .sort(([a], [b]) => Number(a) - Number(b))
-          .map(([chordCount, songs]) => (
-            <Column key={chordCount}>
-              <ColumnTitle>{chordCount} distinct chords</ColumnTitle>
-              <ul>
-                {songs.map((song) => (
+      <>
+        <div>
+          <p>Tracks with all chords parsed: {tracksWithAllChordsParsed}</p>
+          <p>Tracks with parsing errors: {tracksWithParsingErrors}</p>
+        </div>
+        <SongListContainer>
+          {Object.entries(songsByChordCount)
+            .sort(([a], [b]) => Number(a) - Number(b))
+            .map(([chordCount, songs]) => (
+              <Column key={chordCount}>
+                <ColumnTitle>
+                  {chordCount} distinct chords ({songs.length})
+                </ColumnTitle>
+                <ul style={{ listStyleType: "none", padding: 0 }}>
+                  {songs.map((song) => (
+                    <li key={song.filename}>
+                      <SongLink
+                        href={`#${song.filename}`}
+                        onClick={() => handleSongClick(song.filename)}
+                      >
+                        {song.Title}
+                      </SongLink>
+                    </li>
+                  ))}
+                </ul>
+              </Column>
+            ))}
+          {songsWithErrors.length > 0 && (
+            <Column>
+              <ColumnTitle>
+                Songs with parsing errors ({songsWithErrors.length})
+              </ColumnTitle>
+              <ul style={{ listStyleType: "none", padding: 0 }}>
+                {songsWithErrors.map((song) => (
                   <li key={song.filename}>
                     <SongLink
                       href={`#${song.filename}`}
                       onClick={() => handleSongClick(song.filename)}
+                      hasErrors={true}
                     >
                       {song.Title}
                     </SongLink>
+                    <div style={{ display: "flex", flexWrap: "wrap" }}>
+                      {songParsingErrors[song.filename].map((chord, index) => (
+                        <span
+                          key={index}
+                          onMouseEnter={() => handleChordHover(chord)}
+                          onMouseLeave={handleChordLeave}
+                          style={{
+                            backgroundColor: "#f0f0f0",
+                            padding: "2px 5px",
+                            margin: "0 2px",
+                            borderRadius: "3px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          {chord}
+                        </span>
+                      ))}
+                    </div>
                   </li>
                 ))}
               </ul>
             </Column>
-          ))}
-        {songsWithErrors.length > 0 && (
-          <Column>
-            <ColumnTitle>Songs with parsing errors</ColumnTitle>
-            <ul>
-              {songsWithErrors.map((song) => (
-                <li key={song.filename}>
-                  <SongLink
-                    href={`#${song.filename}`}
-                    onClick={() => handleSongClick(song.filename)}
-                    hasErrors={true}
-                  >
-                    {song.Title}
-                  </SongLink>
-                  <div style={{ display: "flex", flexWrap: "wrap" }}>
-                    {songParsingErrors[song.filename].map((chord, index) => (
-                      <span
-                        key={index}
-                        onMouseEnter={() => handleChordHover(chord)}
-                        onMouseLeave={handleChordLeave}
-                        style={{
-                          backgroundColor: "#f0f0f0",
-                          padding: "2px 5px",
-                          margin: "0 2px",
-                          borderRadius: "3px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {chord}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Column>
-        )}
-      </SongListContainer>
+          )}
+        </SongListContainer>
+      </>
     );
   };
 
