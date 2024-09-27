@@ -459,6 +459,7 @@ function App() {
                             handleChordLeave={() => {}}
                             playChord={() => {}}
                             showOnlyLastRep={true}
+                            disableVerticalScroll={true}
                           />
                         )}
                       </SongPreview>
@@ -604,6 +605,7 @@ function App() {
               handleChordHover={handleChordHover}
               handleChordLeave={handleChordLeave}
               playChord={playChord}
+              disableVerticalScroll={false}
             />
           </RightColumn>
         </TwoColumnLayout>

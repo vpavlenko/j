@@ -9,7 +9,7 @@ import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
 const CHORD_WIDTH = 17;
-const GAP_WIDTH = 17;
+const GAP_WIDTH = 12;
 const CHORD_VERTICAL_OFFSET = 20;
 
 // Add this new constant
@@ -20,10 +20,12 @@ const CHORD_LEVEL = {
 };
 
 // Update these styled components
-const AlternativeChordContainer = styled.div`
+const AlternativeChordContainer = styled.div<{
+  disableVerticalScroll?: boolean;
+}>`
   width: 100%;
   height: 100%;
-  overflow-y: auto;
+  overflow-y: ${(props) => (props.disableVerticalScroll ? "hidden" : "auto")};
   overflow-x: auto;
 `;
 
@@ -81,7 +83,7 @@ const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 1.2em;
+  font-size: 0.8em;
   background-color: ${(props) => props.backgroundColor};
   color: ${(props) => getContrastColor(props.backgroundColor)};
   font-weight: bold;
@@ -110,6 +112,7 @@ interface Props {
   handleChordLeave: () => void;
   playChord: (chord: string) => void;
   showOnlyLastRep?: boolean; // Add this new prop
+  disableVerticalScroll?: boolean; // Add this new prop
 }
 
 const TwoLineChord: React.FC<{
@@ -152,6 +155,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   handleChordLeave,
   playChord,
   showOnlyLastRep = false, // Add this new prop with a default value
+  disableVerticalScroll = false, // Add this new prop with a default value
 }) => {
   const parsedChords: ChordInfo[] = chords.map((chord) => {
     const parsedChord: ParsedChord = parseChordName(chord);
@@ -203,7 +207,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       <RootDifference
         backgroundColor={backgroundColor}
         left={left}
-        style={{ top: `${averageLevel + 7}px` }}
+        style={{ top: `${averageLevel + GAP_WIDTH * 0.7}px` }}
       >
         {difference}
       </RootDifference>
@@ -211,7 +215,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   };
 
   return (
-    <AlternativeChordContainer>
+    <AlternativeChordContainer disableVerticalScroll={disableVerticalScroll}>
       <ChordLinesWrapper>
         {showOnlyLastRep ? (
           // Render only the last representation
