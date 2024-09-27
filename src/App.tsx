@@ -63,6 +63,10 @@ function App() {
 
   const [isHoveringChords, setIsHoveringChords] = useState(false);
 
+  const [songStats, setSongStats] = useState<{
+    [key: string]: { nonParsedChords: number; distinctChords: number };
+  }>({});
+
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
   };
@@ -270,14 +274,19 @@ function App() {
   }, []);
 
   useEffect(() => {
+    const stats: {
+      [key: string]: { nonParsedChords: number; distinctChords: number };
+    } = {};
     const errors: { [key: string]: string[] } = {};
 
     CORPUS.forEach((song) => {
       const songErrors: string[] = [];
+      const distinctChords = new Set<string>();
 
       song.chords.forEach((barChords) => {
         barChords.forEach((chord) => {
           chord.split(" ").forEach((chordName) => {
+            distinctChords.add(chordName);
             const parsedChord: ParsedChord = parseChordName(chordName);
             if (
               parsedChord.error ||
@@ -292,9 +301,15 @@ function App() {
       if (songErrors.length > 0) {
         errors[song.filename] = [...new Set(songErrors)]; // Remove duplicates
       }
+
+      stats[song.filename] = {
+        nonParsedChords: new Set(songErrors).size,
+        distinctChords: distinctChords.size,
+      };
     });
 
     setSongParsingErrors(errors);
+    setSongStats(stats);
   }, []);
 
   const togglePlay = () => {
@@ -332,7 +347,26 @@ function App() {
       <h1>Jazz Standards Corpus</h1>
       {!selectedSong ? (
         <ul>
-          {CORPUS.sort((a, b) => a.Title.localeCompare(b.Title)).map((song) => (
+          {CORPUS.sort((a, b) => {
+            const statsA = songStats[a.filename] || {
+              nonParsedChords: 0,
+              distinctChords: 0,
+            };
+            const statsB = songStats[b.filename] || {
+              nonParsedChords: 0,
+              distinctChords: 0,
+            };
+
+            if (statsA.nonParsedChords !== statsB.nonParsedChords) {
+              return statsA.nonParsedChords - statsB.nonParsedChords;
+            }
+
+            if (statsA.distinctChords !== statsB.distinctChords) {
+              return statsA.distinctChords - statsB.distinctChords;
+            }
+
+            return a.Title.localeCompare(b.Title);
+          }).map((song) => (
             <li
               key={song.filename}
               style={{
@@ -350,6 +384,10 @@ function App() {
                 }}
               >
                 {song.Title}
+                <sup>
+                  {songStats[song.filename] &&
+                    ` ${songStats[song.filename].distinctChords}`}
+                </sup>
               </a>
               {songParsingErrors[song.filename] && (
                 <div style={{ display: "flex", flexWrap: "wrap" }}>
