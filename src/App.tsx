@@ -141,7 +141,7 @@ function App() {
         envelope: { attack: 0, decay: 0, sustain: 0, release: 0.1 },
       }).toDestination();
 
-      const secondsPerBeat = 20 / bpm;
+      const secondsPerBeat = 40 / bpm;
       const secondsPerBar =
         secondsPerBeat * (selectedSongData?.TimeSig[0] || 4);
 
