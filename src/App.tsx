@@ -5,6 +5,12 @@ import * as Tone from "tone";
 import { Song } from "./corpus";
 import guitarChords from "./guitarChords";
 import { strum } from "./utils";
+import { initializePiano } from "./helpers/pianoInitializer";
+import {
+  parseChordName,
+  checkChordAvailability,
+  ParsedChord,
+} from "./helpers/chordParser";
 
 interface ChordEvent {
   chord: string;
@@ -90,50 +96,12 @@ function App() {
     }
   }, [selectedSongData]);
 
-  const initializePiano = async () => {
-    const piano = new Tone.Sampler({
-      urls: {
-        A0: "A0.mp3",
-        C1: "C1.mp3",
-        "D#1": "Ds1.mp3",
-        "F#1": "Fs1.mp3",
-        A1: "A1.mp3",
-        C2: "C2.mp3",
-        "D#2": "Ds2.mp3",
-        "F#2": "Fs2.mp3",
-        A2: "A2.mp3",
-        C3: "C3.mp3",
-        "D#3": "Ds3.mp3",
-        "F#3": "Fs3.mp3",
-        A3: "A3.mp3",
-        C4: "C4.mp3",
-        "D#4": "Ds4.mp3",
-        "F#4": "Fs4.mp3",
-        A4: "A4.mp3",
-        C5: "C5.mp3",
-        "D#5": "Ds5.mp3",
-        "F#5": "Fs5.mp3",
-        A5: "A5.mp3",
-        C6: "C6.mp3",
-        "D#6": "Ds6.mp3",
-        "F#6": "Fs6.mp3",
-        A6: "A6.mp3",
-        C7: "C7.mp3",
-        "D#7": "Ds7.mp3",
-        "F#7": "Fs7.mp3",
-        A7: "A7.mp3",
-        C8: "C8.mp3",
-      },
-      release: 1,
-      baseUrl: "https://tonejs.github.io/audio/salamander/",
-    }).toDestination();
-
-    await Tone.loaded();
-    setSampler(piano);
-  };
-
   useEffect(() => {
-    initializePiano();
+    const initPiano = async () => {
+      const piano = await initializePiano();
+      setSampler(piano);
+    };
+    initPiano();
   }, []);
 
   useEffect(() => {
@@ -209,7 +177,13 @@ function App() {
   };
 
   function getMidiNotesForChord(chordName: string): number[] {
-    const [root, suffix] = parseChordName(chordName);
+    const parsedChord: ParsedChord = parseChordName(chordName);
+    if (parsedChord.error) {
+      console.error(parsedChord.error);
+      return [];
+    }
+
+    const { root, suffix } = parsedChord;
     const chordData = guitarChords.chords[root]?.find(
       (chord) => chord.suffix === suffix
     );
@@ -236,147 +210,43 @@ function App() {
     }
   }
 
-  function parseChordName(chordName: string): [string, string] {
-    const keys = guitarChords.keys;
-    let root = "";
-    let suffix = "";
+  const handleChordHover = useCallback((chordName: string) => {
+    console.log(`Original chord name: ${chordName}`);
 
-    const rootMapping: { [key: string]: string } = {
-      Cb: "B",
-      Db: "Csharp",
-      "D#": "Eb",
-      "F#": "Fsharp",
-      Gb: "Fsharp",
-      "G#": "Ab",
-      "A#": "Bb",
-      "C#": "Csharp",
-    };
+    const parsedChord: ParsedChord = parseChordName(chordName);
+    console.log(`Parsed chord:`, parsedChord);
 
-    // First, check for keys that need to be mapped
-    for (const [originalRoot, mappedRoot] of Object.entries(rootMapping)) {
-      if (chordName.startsWith(originalRoot)) {
-        root = mappedRoot;
-        suffix = chordName.slice(originalRoot.length);
-        break;
-      }
+    if (parsedChord.error) {
+      console.error(parsedChord.error);
+      setHoverInfo(null);
+      setHoverChord(null);
+      return;
     }
 
-    // If no mapped key was found, then check the standard keys
-    if (!root) {
-      for (let i = 0; i < keys.length; i++) {
-        if (chordName.startsWith(keys[i])) {
-          root = keys[i];
-          suffix = chordName.slice(keys[i].length);
-          break;
-        }
-      }
-    }
+    const { root, suffix } = parsedChord;
+    const available = checkChordAvailability(root, suffix);
+    console.log(`Availability for ${root}${suffix}: ${available}`);
 
-    suffix = suffixMapping(suffix);
-
-    return [root, suffix];
-  }
-
-  const suffixMapping = (suffix: string): string => {
-    if (suffix === "7") return "7";
-    if (suffix === "7alt") return "7#9";
-    if (suffix === "") return "major";
-    if (suffix === "m") return "minor";
-    if (suffix === "M") return "major";
-    if (suffix === "M7") return "maj7";
-    if (suffix === "M7#5") return "maj7#5";
-    if (suffix === "M7b5") return "maj7b5";
-    if (suffix === "6/9") return "69";
-    if (suffix === "9b5") return "9b5";
-    if (suffix === "dim7") return "dim7";
-    if (suffix === "m7b5") return "m7b5";
-    if (suffix === "m/M7") return "mmaj7";
-    if (suffix === "mMaj7") return "mmaj7";
-    if (suffix === "mM7") return "mmaj7";
-    if (suffix === "m6/9") return "m69";
-    if (suffix === "7b9") return "7b9";
-    if (suffix === "7#9") return "7#9";
-    if (suffix === "7#5") return "aug7";
-    if (suffix === "7#5#9") return "alt";
-    if (suffix === "m7") return "m7";
-    if (suffix === "m9") return "m9";
-    if (suffix === "maj7") return "maj7";
-    if (suffix === "madd9") return "madd9";
-    if (suffix === "maj9") return "maj9";
-    if (suffix === "7b5") return "7b5";
-    if (suffix === "aug") return "aug";
-    if (suffix === "aug7") return "aug7";
-    if (suffix === "add9") return "add9";
-    if (suffix === "add11") return "add11";
-    if (suffix === "dim") return "dim";
-    if (suffix === "mmaj7b5") return "mmaj7b5";
-    if (suffix === "mmaj9") return "mmaj9";
-    if (suffix === "mmaj11") return "mmaj11";
-    if (suffix === "7sus4") return "7sus4";
-    if (suffix === "11") return "11";
-    if (suffix === "9#11") return "9#11";
-    if (suffix === "13") return "13";
-    if (suffix === "o7") return "dim7";
-    if (suffix === "+") return "aug";
-    if (suffix === "+7") return "aug7";
-    if (suffix === "7+") return "aug7";
-    if (suffix === "7sus") return "7sus4";
-    if (suffix === "9sus4") return "7sus4";
-    if (suffix === "o") return "dim";
-    if (suffix === "M6") return "6";
-    if (suffix === "7#11") return "9#11";
-    if (suffix === "M7#11") return "maj7b5";
-    if (suffix.includes("m7/")) return suffix.replace("m7/", "m/");
-    if (suffix.includes("/")) return suffix;
-    if (suffix.includes("sus")) return suffix;
-
-    return suffix;
-  };
-
-  const checkChordAvailability = useCallback((root: string, suffix: string) => {
-    console.log(
-      `Checking availability for root: "${root}", suffix: "${suffix}"`
-    );
-    const chordData = guitarChords.chords[root]?.find(
-      (chord) => chord.suffix === suffix
-    );
-    return !!chordData;
-  }, []);
-
-  const handleChordHover = useCallback(
-    (chordName: string) => {
-      console.log(`Original chord name: ${chordName}`);
-
-      const [root, suffix] = parseChordName(chordName);
+    if (!available) {
+      console.log(`Debugging unavailable chord:`);
       console.log(
-        `Parsed chord: ${chordName} -> root: ${root}, suffix: ${suffix}`
+        `- Checking root "${root}" in guitarChords:`,
+        !!guitarChords.chords[root]
       );
 
-      const available = checkChordAvailability(root, suffix);
-      console.log(`Availability for ${root}${suffix}: ${available}`);
-
-      if (!available) {
-        console.log(`Debugging unavailable chord:`);
+      if (guitarChords.chords[root]) {
         console.log(
-          `- Checking root "${root}" in guitarChords:`,
-          !!guitarChords.chords[root]
+          `- Available suffixes for ${root}:`,
+          guitarChords.chords[root].map((chord) => chord.suffix)
         );
-
-        if (guitarChords.chords[root]) {
-          console.log(
-            `- Available suffixes for ${root}:`,
-            guitarChords.chords[root].map((chord) => chord.suffix)
-          );
-        } else {
-          console.log(`- Available roots:`, Object.keys(guitarChords.chords));
-        }
+      } else {
+        console.log(`- Available roots:`, Object.keys(guitarChords.chords));
       }
+    }
 
-      setHoverInfo({ root, suffix, available });
-      setHoverChord({ chord: chordName, root, suffix });
-    },
-    [checkChordAvailability]
-  );
+    setHoverInfo({ root, suffix, available });
+    setHoverChord({ chord: chordName, root, suffix });
+  }, []);
 
   const handleChordLeave = useCallback(() => {
     setHoverInfo(null);
@@ -392,8 +262,11 @@ function App() {
       song.chords.forEach((barChords) => {
         barChords.forEach((chord) => {
           chord.split(" ").forEach((chordName) => {
-            const [root, suffix] = parseChordName(chordName);
-            if (!checkChordAvailability(root, suffix)) {
+            const parsedChord: ParsedChord = parseChordName(chordName);
+            if (
+              parsedChord.error ||
+              !checkChordAvailability(parsedChord.root, parsedChord.suffix)
+            ) {
               songErrors.push(chordName);
             }
           });
