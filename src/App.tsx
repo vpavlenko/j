@@ -38,6 +38,30 @@ const RightColumn = styled.div`
   overflow-x: auto;
 `;
 
+const SongListContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+`;
+
+const Column = styled.div`
+  flex: 1;
+  min-width: 200px;
+`;
+
+const ColumnTitle = styled.h3`
+  margin-bottom: 10px;
+`;
+
+const SongLink = styled.a<{ hasErrors?: boolean }>`
+  text-decoration: none;
+  color: ${(props) => (props.hasErrors ? "red" : "inherit")};
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -356,76 +380,94 @@ function App() {
     );
   }, [selectedSongData]);
 
+  const renderSongList = () => {
+    const songsByChordCount: { [key: number]: Song[] } = {};
+    const songsWithErrors: Song[] = [];
+
+    CORPUS.forEach((song) => {
+      const stats = songStats[song.filename] || {
+        nonParsedChords: 0,
+        distinctChords: 0,
+      };
+      const hasErrors = songParsingErrors[song.filename];
+
+      if (hasErrors) {
+        songsWithErrors.push(song);
+      } else {
+        const chordCount = stats.distinctChords;
+        if (!songsByChordCount[chordCount]) {
+          songsByChordCount[chordCount] = [];
+        }
+        songsByChordCount[chordCount].push(song);
+      }
+    });
+
+    return (
+      <SongListContainer>
+        {Object.entries(songsByChordCount)
+          .sort(([a], [b]) => Number(a) - Number(b))
+          .map(([chordCount, songs]) => (
+            <Column key={chordCount}>
+              <ColumnTitle>{chordCount} distinct chords</ColumnTitle>
+              <ul>
+                {songs.map((song) => (
+                  <li key={song.filename}>
+                    <SongLink
+                      href={`#${song.filename}`}
+                      onClick={() => handleSongClick(song.filename)}
+                    >
+                      {song.Title}
+                    </SongLink>
+                  </li>
+                ))}
+              </ul>
+            </Column>
+          ))}
+        {songsWithErrors.length > 0 && (
+          <Column>
+            <ColumnTitle>Songs with parsing errors</ColumnTitle>
+            <ul>
+              {songsWithErrors.map((song) => (
+                <li key={song.filename}>
+                  <SongLink
+                    href={`#${song.filename}`}
+                    onClick={() => handleSongClick(song.filename)}
+                    hasErrors={true}
+                  >
+                    {song.Title}
+                  </SongLink>
+                  <div style={{ display: "flex", flexWrap: "wrap" }}>
+                    {songParsingErrors[song.filename].map((chord, index) => (
+                      <span
+                        key={index}
+                        onMouseEnter={() => handleChordHover(chord)}
+                        onMouseLeave={handleChordLeave}
+                        style={{
+                          backgroundColor: "#f0f0f0",
+                          padding: "2px 5px",
+                          margin: "0 2px",
+                          borderRadius: "3px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {chord}
+                      </span>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Column>
+        )}
+      </SongListContainer>
+    );
+  };
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
       {!selectedSong ? (
-        <ul>
-          {CORPUS.sort((a, b) => {
-            const statsA = songStats[a.filename] || {
-              nonParsedChords: 0,
-              distinctChords: 0,
-            };
-            const statsB = songStats[b.filename] || {
-              nonParsedChords: 0,
-              distinctChords: 0,
-            };
-
-            if (statsA.nonParsedChords !== statsB.nonParsedChords) {
-              return statsA.nonParsedChords - statsB.nonParsedChords;
-            }
-
-            if (statsA.distinctChords !== statsB.distinctChords) {
-              return statsA.distinctChords - statsB.distinctChords;
-            }
-
-            return a.Title.localeCompare(b.Title);
-          }).map((song) => (
-            <li
-              key={song.filename}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginBottom: "10px",
-              }}
-            >
-              <a
-                href={`#${song.filename}`}
-                onClick={() => handleSongClick(song.filename)}
-                style={{
-                  color: songParsingErrors[song.filename] ? "red" : "inherit",
-                  marginRight: "10px",
-                }}
-              >
-                {song.Title}
-                <sup>
-                  {songStats[song.filename] &&
-                    ` ${songStats[song.filename].distinctChords}`}
-                </sup>
-              </a>
-              {songParsingErrors[song.filename] && (
-                <div style={{ display: "flex", flexWrap: "wrap" }}>
-                  {songParsingErrors[song.filename].map((chord, index) => (
-                    <span
-                      key={index}
-                      onMouseEnter={() => handleChordHover(chord)}
-                      onMouseLeave={handleChordLeave}
-                      style={{
-                        backgroundColor: "#f0f0f0",
-                        padding: "2px 5px",
-                        margin: "0 2px",
-                        borderRadius: "3px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      {chord}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </li>
-          ))}
-        </ul>
+        renderSongList()
       ) : (
         <TwoColumnLayout>
           <LeftColumn>
