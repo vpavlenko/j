@@ -119,6 +119,49 @@ function App() {
     number | null
   >(null);
 
+  const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Function to get the first two songs from each of the first two columns
+    const getFirstTwoSongsFromTwoColumns = () => {
+      const songsByChordCount: { [key: number]: Song[] } = {};
+      CORPUS.forEach((song) => {
+        const stats = songStats[song.filename] || { distinctChords: 0 };
+        const chordCount = stats.distinctChords;
+        if (!songParsingErrors[song.filename]) {
+          if (!songsByChordCount[chordCount]) {
+            songsByChordCount[chordCount] = [];
+          }
+          songsByChordCount[chordCount].push(song);
+        }
+      });
+
+      const sortedColumns = Object.entries(songsByChordCount)
+        .sort(([a], [b]) => Number(a) - Number(b))
+        .slice(0, 10);
+
+      return sortedColumns.flatMap(([, songs]) =>
+        songs.slice(0, 20).map((song) => song.filename)
+      );
+    };
+
+    // Set the songs to auto-preview
+    const songsToPreview = getFirstTwoSongsFromTwoColumns();
+    setAutoPreviewSongs(songsToPreview);
+
+    // Simulate hover for these songs
+    songsToPreview.forEach((filename) => {
+      handleMouseEnter(filename);
+    });
+
+    // Clean up function
+    return () => {
+      songsToPreview.forEach((filename) => {
+        setHoveredSongs((prev) => ({ ...prev, [filename]: false }));
+      });
+    };
+  }, [songStats, songParsingErrors]);
+
   const stopAllPlayback = useCallback(() => {
     Tone.Transport.stop();
     Tone.Transport.cancel();
@@ -567,6 +610,12 @@ function App() {
                     <SongItem
                       key={song.filename}
                       onMouseEnter={() => handleMouseEnter(song.filename)}
+                      onMouseLeave={() =>
+                        setHoveredSongs((prev) => ({
+                          ...prev,
+                          [song.filename]: false,
+                        }))
+                      }
                     >
                       <SongLink
                         href={`#${song.filename}`}
@@ -581,7 +630,8 @@ function App() {
                       />
                       <SongPreview>
                         {(hoveredSongs[song.filename] ||
-                          previewPlayingSong === song.filename) && (
+                          previewPlayingSong === song.filename ||
+                          autoPreviewSongs.includes(song.filename)) && (
                           <AlternativeChordRepresentation
                             key={`${song.filename}`}
                             chords={song.chords

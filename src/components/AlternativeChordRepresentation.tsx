@@ -8,7 +8,7 @@ import {
 import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
-const CHORD_WIDTH = 17;
+const CHORD_WIDTH = 12;
 const GAP_WIDTH = 12;
 const CHORD_VERTICAL_OFFSET = 15;
 
