@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import "./App.css";
 import { CORPUS } from "./corpus";
 import * as Tone from "tone";
@@ -441,6 +441,13 @@ function App() {
     };
   }, [isPlaying, isHoveringChords]);
 
+  const flattenedChords = useMemo(() => {
+    if (!selectedSongData) return [];
+    return selectedSongData.chords.flatMap((bar) =>
+      bar.flatMap((chord) => chord.split(" "))
+    );
+  }, [selectedSongData]);
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
@@ -489,63 +496,83 @@ function App() {
           ))}
         </ul>
       ) : (
-        <div>
-          <button onClick={() => setSelectedSong(null)}>Back to list</button>
-          {selectedSongData && (
-            <div>
-              <h2>{selectedSongData.Title}</h2>
-              <button onClick={togglePlay}>
-                {isPlaying ? "Stop" : "Play"}
-              </button>
-              <p>Composed by: {selectedSongData.ComposedBy}</p>
-              <p>Key: {selectedSongData.DBKeySig}</p>
-              <p>Time Signature: {selectedSongData.TimeSig.join("/")}</p>
-              <p>Bars: {selectedSongData.Bars}</p>
-              <h3>Chords:</h3>
-              <div
-                className="chords"
-                onMouseEnter={() => setIsHoveringChords(true)}
-                onMouseLeave={() => setIsHoveringChords(false)}
-              >
-                {selectedSongData.chords.map((barChords, barIndex) => (
-                  <div key={barIndex} className="chord-bar">
-                    {barChords.map((chord, chordIndex) => (
-                      <React.Fragment key={`${barIndex}-${chordIndex}`}>
-                        {chordIndex > 0 && " | "}
-                        {chord.split(" ").map((chordName, i) => {
-                          const linearIndex = getLinearIndex(
-                            barIndex,
-                            chordIndex,
-                            i,
-                            selectedSongData
-                          );
-                          return (
-                            <span
-                              key={`${chordIndex}-${i}`}
-                              className={
-                                currentChordIndex === linearIndex
-                                  ? "chord highlight"
-                                  : "chord"
-                              }
-                            >
-                              {chordName}
-                            </span>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                ))}
-              </div>
-              {hoverInfo && (
-                <div className="chord-info">
-                  <p>Root: {hoverInfo.root}</p>
-                  <p>Suffix: {hoverInfo.suffix}</p>
-                  <p>Available: {hoverInfo.available ? "Yes" : "No"}</p>
+        <div style={{ display: "flex" }}>
+          <div style={{ flex: 1 }}>
+            <button onClick={() => setSelectedSong(null)}>Back to list</button>
+            {selectedSongData && (
+              <div>
+                <h2>{selectedSongData.Title}</h2>
+                <button onClick={togglePlay}>
+                  {isPlaying ? "Stop" : "Play"}
+                </button>
+                <p>Composed by: {selectedSongData.ComposedBy}</p>
+                <p>Key: {selectedSongData.DBKeySig}</p>
+                <p>Time Signature: {selectedSongData.TimeSig.join("/")}</p>
+                <p>Bars: {selectedSongData.Bars}</p>
+                <h3>Chords:</h3>
+                <div
+                  className="chords"
+                  onMouseEnter={() => setIsHoveringChords(true)}
+                  onMouseLeave={() => setIsHoveringChords(false)}
+                >
+                  {selectedSongData.chords.map((barChords, barIndex) => (
+                    <div key={barIndex} className="chord-bar">
+                      {barChords.map((chord, chordIndex) => (
+                        <React.Fragment key={`${barIndex}-${chordIndex}`}>
+                          {chordIndex > 0 && " | "}
+                          {chord.split(" ").map((chordName, i) => {
+                            const linearIndex = getLinearIndex(
+                              barIndex,
+                              chordIndex,
+                              i,
+                              selectedSongData
+                            );
+                            return (
+                              <span
+                                key={`${chordIndex}-${i}`}
+                                className={
+                                  currentChordIndex === linearIndex
+                                    ? "chord highlight"
+                                    : "chord"
+                                }
+                              >
+                                {chordName}
+                              </span>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  ))}
                 </div>
-              )}
+                {hoverInfo && (
+                  <div className="chord-info">
+                    <p>Root: {hoverInfo.root}</p>
+                    <p>Suffix: {hoverInfo.suffix}</p>
+                    <p>Available: {hoverInfo.available ? "Yes" : "No"}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+          <div style={{ flex: 1, marginLeft: "20px" }}>
+            <h3>Alternative Chord Representation:</h3>
+            <div className="flattened-chords">
+              {flattenedChords.map((chord, index) => (
+                <span
+                  key={index}
+                  className={
+                    currentChordIndex === index ? "chord highlight" : "chord"
+                  }
+                  onMouseEnter={() => handleChordHover(chord)}
+                  onMouseLeave={handleChordLeave}
+                  style={{ margin: "0 5px", cursor: "pointer" }}
+                >
+                  {chord}
+                </span>
+              ))}
             </div>
-          )}
+          </div>
         </div>
       )}
       {hoverChord && !isHoveringChords && (
