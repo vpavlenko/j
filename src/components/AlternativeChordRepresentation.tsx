@@ -3,6 +3,9 @@ import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import { getRootDifference } from "../utils";
 import styled from "styled-components";
 
+// Add this constant at the top of the file, after the imports
+const CHORD_VERTICAL_OFFSET = 10;
+
 // Update these styled components
 const AlternativeChordContainer = styled.div`
   width: 100%;
@@ -51,6 +54,7 @@ const RootDifference = styled.span`
   transform: translate(-300%, 30%);
   font-size: 0.7em;
   color: red;
+  font-weight: bold;
   z-index: 1;
 `;
 
@@ -140,7 +144,11 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
               top={
-                chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+                chordInfo.isMinor
+                  ? `-${CHORD_VERTICAL_OFFSET}px`
+                  : chordInfo.isMajor
+                  ? `${CHORD_VERTICAL_OFFSET}px`
+                  : "0"
               }
             />
           ))}
@@ -173,7 +181,11 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
                 top={
-                  chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+                  chordInfo.isMinor
+                    ? `-${CHORD_VERTICAL_OFFSET}px`
+                    : chordInfo.isMajor
+                    ? `${CHORD_VERTICAL_OFFSET}px`
+                    : "0"
                 }
               />
             </div>
@@ -204,7 +216,11 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
                 top={
-                  chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+                  chordInfo.isMinor
+                    ? `-${CHORD_VERTICAL_OFFSET}px`
+                    : chordInfo.isMajor
+                    ? `${CHORD_VERTICAL_OFFSET}px`
+                    : "0"
                 }
               >
                 {chordInfo.originalSuffix}
