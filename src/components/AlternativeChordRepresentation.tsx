@@ -68,6 +68,11 @@ interface ChordInfo {
   isMinor: boolean;
 }
 
+interface SquashedChordInfo extends ChordInfo {
+  startIndex: number;
+  endIndex: number;
+}
+
 interface Props {
   chords: string[];
   currentChordIndex: number | null;
@@ -114,6 +119,18 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     };
   });
 
+  const squashedChords: SquashedChordInfo[] = parsedChords.reduce(
+    (acc: SquashedChordInfo[], curr: ChordInfo, index: number) => {
+      if (index === 0 || curr.chord !== parsedChords[index - 1].chord) {
+        acc.push({ ...curr, startIndex: index, endIndex: index });
+      } else {
+        acc[acc.length - 1].endIndex = index;
+      }
+      return acc;
+    },
+    []
+  );
+
   const renderRootDifference = (
     currentChord: ChordInfo,
     nextChord: ChordInfo
@@ -145,15 +162,34 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
           ))}
         </ChordLine>
 
-        {/* Second repetition */}
+        {/* Duplicate of first repetition */}
         <ChordLine style={{ marginTop: "50px" }}>
           {parsedChords.map((chordInfo, index) => (
+            <TwoLineChord
+              key={`line-1b-${index}`}
+              chord={chordInfo.chord}
+              root={chordInfo.originalRoot}
+              suffix={chordInfo.originalSuffix}
+              highlight={currentChordIndex === index}
+              onMouseEnter={() => handleChordHover(chordInfo.chord)}
+              onMouseLeave={handleChordLeave}
+            />
+          ))}
+        </ChordLine>
+
+        {/* Second repetition - squashed chords */}
+        <ChordLine style={{ marginTop: "50px" }}>
+          {squashedChords.map((chordInfo, index) => (
             <TwoLineChord
               key={`line-2-${index}`}
               chord={chordInfo.chord}
               root={chordInfo.originalRoot}
               suffix={chordInfo.originalSuffix}
-              highlight={currentChordIndex === index}
+              highlight={
+                currentChordIndex !== null &&
+                currentChordIndex >= chordInfo.startIndex &&
+                currentChordIndex <= chordInfo.endIndex
+              }
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
               top={
@@ -169,7 +205,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
 
         {/* Third repetition - with root difference numbers */}
         <ChordLine style={{ marginTop: "100px" }}>
-          {parsedChords.map((chordInfo, index) => (
+          {squashedChords.map((chordInfo, index) => (
             <div
               key={`line-3-${index}`}
               style={{
@@ -178,13 +214,17 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
-              {index < parsedChords.length - 1 &&
-                renderRootDifference(chordInfo, parsedChords[index + 1])}
+              {index < squashedChords.length - 1 &&
+                renderRootDifference(chordInfo, squashedChords[index + 1])}
               <TwoLineChord
                 chord={chordInfo.chord}
                 root={chordInfo.originalRoot}
                 suffix={chordInfo.originalSuffix}
-                highlight={currentChordIndex === index}
+                highlight={
+                  currentChordIndex !== null &&
+                  currentChordIndex >= chordInfo.startIndex &&
+                  currentChordIndex <= chordInfo.endIndex
+                }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
                 top={
@@ -201,7 +241,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
 
         {/* Fourth repetition - simplified suffixes with root difference numbers */}
         <ChordLine style={{ marginTop: "100px" }}>
-          {parsedChords.map((chordInfo, index) => (
+          {squashedChords.map((chordInfo, index) => (
             <div
               key={`line-4-${index}`}
               style={{
@@ -210,10 +250,14 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
-              {index < parsedChords.length - 1 &&
-                renderRootDifference(chordInfo, parsedChords[index + 1])}
+              {index < squashedChords.length - 1 &&
+                renderRootDifference(chordInfo, squashedChords[index + 1])}
               <ChordSpan
-                highlight={currentChordIndex === index}
+                highlight={
+                  currentChordIndex !== null &&
+                  currentChordIndex >= chordInfo.startIndex &&
+                  currentChordIndex <= chordInfo.endIndex
+                }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
                 top={
