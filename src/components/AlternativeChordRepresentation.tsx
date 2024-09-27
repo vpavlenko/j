@@ -8,9 +8,16 @@ import {
 import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
-const CHORD_WIDTH = 30;
-const GAP_WIDTH = 15;
+const CHORD_WIDTH = 17;
+const GAP_WIDTH = 17;
 const CHORD_VERTICAL_OFFSET = 20;
+
+// Add this new constant
+const CHORD_LEVEL = {
+  MINOR: -CHORD_VERTICAL_OFFSET,
+  NEUTRAL: 0,
+  MAJOR: CHORD_VERTICAL_OFFSET,
+};
 
 // Update these styled components
 const AlternativeChordContainer = styled.div`
@@ -170,9 +177,15 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     []
   );
 
+  const getChordLevel = (chord: SquashedChordInfo): number => {
+    if (chord.isMinor) return CHORD_LEVEL.MINOR;
+    if (chord.isMajor) return CHORD_LEVEL.MAJOR;
+    return CHORD_LEVEL.NEUTRAL;
+  };
+
   const renderRootDifference = (
-    currentChord: ChordInfo,
-    nextChord: ChordInfo,
+    currentChord: SquashedChordInfo,
+    nextChord: SquashedChordInfo,
     left: number
   ) => {
     const difference = getRootDifference(currentChord.root, nextChord.root);
@@ -181,8 +194,16 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
         ? "gray"
         : getRootDifferenceColor(parseInt(difference, 10));
 
+    const currentLevel = getChordLevel(currentChord);
+    const nextLevel = getChordLevel(nextChord);
+    const averageLevel = (currentLevel + nextLevel) / 2;
+
     return (
-      <RootDifference backgroundColor={backgroundColor} left={left}>
+      <RootDifference
+        backgroundColor={backgroundColor}
+        left={left}
+        style={{ top: `${averageLevel + 7}px` }}
+      >
         {difference}
       </RootDifference>
     );
@@ -251,15 +272,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
-                onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
+                onClick={() => playChord(chordInfo.chord)}
                 left={index * (CHORD_WIDTH + GAP_WIDTH)}
-                top={
-                  chordInfo.isMinor
-                    ? `-${CHORD_VERTICAL_OFFSET}px`
-                    : chordInfo.isMajor
-                    ? `${CHORD_VERTICAL_OFFSET}px`
-                    : "0"
-                }
+                top={`${getChordLevel(chordInfo)}px`}
               />
               {index < squashedChords.length - 1 &&
                 renderRootDifference(
@@ -283,15 +298,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
-                onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
+                onClick={() => playChord(chordInfo.chord)}
                 left={index * (CHORD_WIDTH + GAP_WIDTH)}
-                top={
-                  chordInfo.isMinor
-                    ? `-${CHORD_VERTICAL_OFFSET}px`
-                    : chordInfo.isMajor
-                    ? `${CHORD_VERTICAL_OFFSET}px`
-                    : "0"
-                }
+                top={`${getChordLevel(chordInfo)}px`}
               >
                 {chordInfo.originalSuffix || "M"}
               </ChordSpan>
