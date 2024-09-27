@@ -108,8 +108,8 @@ interface Props {
   currentChordIndex: number | null;
   handleChordHover: (chord: string) => void;
   handleChordLeave: () => void;
-  // Add this new prop
   playChord: (chord: string) => void;
+  showOnlyLastRep?: boolean; // Add this new prop
 }
 
 const TwoLineChord: React.FC<{
@@ -119,7 +119,7 @@ const TwoLineChord: React.FC<{
   highlight: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-  onClick: () => void; // Add this new prop
+  onClick: () => void;
   left: number;
   top?: string;
 }> = ({
@@ -136,7 +136,7 @@ const TwoLineChord: React.FC<{
     highlight={highlight}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
-    onClick={onClick} // Add this onClick handler
+    onClick={onClick}
     left={left}
     top={top}
   >
@@ -150,7 +150,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   currentChordIndex,
   handleChordHover,
   handleChordLeave,
-  playChord, // Add this new prop
+  playChord,
+  showOnlyLastRep = false, // Add this new prop with a default value
 }) => {
   const parsedChords: ChordInfo[] = chords.map((chord) => {
     const parsedChord: ParsedChord = parseChordName(chord);
@@ -212,107 +213,140 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   return (
     <AlternativeChordContainer>
       <ChordLinesWrapper>
-        {/* First repetition */}
-        <ChordLine>
-          {parsedChords.map((chordInfo, index) => (
-            <TwoLineChord
-              key={`line-1-${index}`}
-              chord={chordInfo.chord}
-              root={chordInfo.originalRoot}
-              suffix={chordInfo.originalSuffix}
-              highlight={currentChordIndex === index}
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-              onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
-              left={index * (CHORD_WIDTH + GAP_WIDTH)}
-            />
-          ))}
-        </ChordLine>
+        {showOnlyLastRep ? (
+          // Render only the last representation
+          <ChordLine>
+            {squashedChords.map((chordInfo, index) => (
+              <React.Fragment key={`last-rep-${index}`}>
+                <ChordSpan
+                  highlight={
+                    currentChordIndex !== null &&
+                    currentChordIndex >= chordInfo.startIndex &&
+                    currentChordIndex <= chordInfo.endIndex
+                  }
+                  onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                  onMouseLeave={handleChordLeave}
+                  onClick={() => playChord(chordInfo.chord)}
+                  left={index * (CHORD_WIDTH + GAP_WIDTH)}
+                  top={`${getChordLevel(chordInfo)}px`}
+                >
+                  {chordInfo.originalSuffix || "M"}
+                </ChordSpan>
+                {index < squashedChords.length - 1 &&
+                  renderRootDifference(
+                    chordInfo,
+                    squashedChords[index + 1],
+                    index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
+                  )}
+              </React.Fragment>
+            ))}
+          </ChordLine>
+        ) : (
+          // Render all representations
+          <>
+            {/* First repetition */}
+            <ChordLine>
+              {parsedChords.map((chordInfo, index) => (
+                <TwoLineChord
+                  key={`line-1-${index}`}
+                  chord={chordInfo.chord}
+                  root={chordInfo.originalRoot}
+                  suffix={chordInfo.originalSuffix}
+                  highlight={currentChordIndex === index}
+                  onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                  onMouseLeave={handleChordLeave}
+                  onClick={() => playChord(chordInfo.chord)}
+                  left={index * (CHORD_WIDTH + GAP_WIDTH)}
+                />
+              ))}
+            </ChordLine>
 
-        {/* Second repetition - squashed chords */}
-        <ChordLine>
-          {squashedChords.map((chordInfo, index) => (
-            <TwoLineChord
-              key={`line-2-${index}`}
-              chord={chordInfo.chord}
-              root={chordInfo.originalRoot}
-              suffix={chordInfo.originalSuffix}
-              highlight={
-                currentChordIndex !== null &&
-                currentChordIndex >= chordInfo.startIndex &&
-                currentChordIndex <= chordInfo.endIndex
-              }
-              onMouseEnter={() => handleChordHover(chordInfo.chord)}
-              onMouseLeave={handleChordLeave}
-              onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
-              left={index * (CHORD_WIDTH + GAP_WIDTH)}
-              top={
-                chordInfo.isMinor
-                  ? `-${CHORD_VERTICAL_OFFSET}px`
-                  : chordInfo.isMajor
-                  ? `${CHORD_VERTICAL_OFFSET}px`
-                  : "0"
-              }
-            />
-          ))}
-        </ChordLine>
+            {/* Second repetition - squashed chords */}
+            <ChordLine>
+              {squashedChords.map((chordInfo, index) => (
+                <TwoLineChord
+                  key={`line-2-${index}`}
+                  chord={chordInfo.chord}
+                  root={chordInfo.originalRoot}
+                  suffix={chordInfo.originalSuffix}
+                  highlight={
+                    currentChordIndex !== null &&
+                    currentChordIndex >= chordInfo.startIndex &&
+                    currentChordIndex <= chordInfo.endIndex
+                  }
+                  onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                  onMouseLeave={handleChordLeave}
+                  onClick={() => playChord(chordInfo.chord)}
+                  left={index * (CHORD_WIDTH + GAP_WIDTH)}
+                  top={
+                    chordInfo.isMinor
+                      ? `-${CHORD_VERTICAL_OFFSET}px`
+                      : chordInfo.isMajor
+                      ? `${CHORD_VERTICAL_OFFSET}px`
+                      : "0"
+                  }
+                />
+              ))}
+            </ChordLine>
 
-        {/* Third repetition - with root difference numbers */}
-        <ChordLine>
-          {squashedChords.map((chordInfo, index) => (
-            <React.Fragment key={`line-3-${index}`}>
-              <TwoLineChord
-                chord={chordInfo.chord}
-                root={chordInfo.originalRoot}
-                suffix={chordInfo.originalSuffix}
-                highlight={
-                  currentChordIndex !== null &&
-                  currentChordIndex >= chordInfo.startIndex &&
-                  currentChordIndex <= chordInfo.endIndex
-                }
-                onMouseEnter={() => handleChordHover(chordInfo.chord)}
-                onMouseLeave={handleChordLeave}
-                onClick={() => playChord(chordInfo.chord)}
-                left={index * (CHORD_WIDTH + GAP_WIDTH)}
-                top={`${getChordLevel(chordInfo)}px`}
-              />
-              {index < squashedChords.length - 1 &&
-                renderRootDifference(
-                  chordInfo,
-                  squashedChords[index + 1],
-                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
-                )}
-            </React.Fragment>
-          ))}
-        </ChordLine>
+            {/* Third repetition - with root difference numbers */}
+            <ChordLine>
+              {squashedChords.map((chordInfo, index) => (
+                <React.Fragment key={`line-3-${index}`}>
+                  <TwoLineChord
+                    chord={chordInfo.chord}
+                    root={chordInfo.originalRoot}
+                    suffix={chordInfo.originalSuffix}
+                    highlight={
+                      currentChordIndex !== null &&
+                      currentChordIndex >= chordInfo.startIndex &&
+                      currentChordIndex <= chordInfo.endIndex
+                    }
+                    onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                    onMouseLeave={handleChordLeave}
+                    onClick={() => playChord(chordInfo.chord)}
+                    left={index * (CHORD_WIDTH + GAP_WIDTH)}
+                    top={`${getChordLevel(chordInfo)}px`}
+                  />
+                  {index < squashedChords.length - 1 &&
+                    renderRootDifference(
+                      chordInfo,
+                      squashedChords[index + 1],
+                      index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
+                    )}
+                </React.Fragment>
+              ))}
+            </ChordLine>
 
-        {/* Fourth repetition - simplified suffixes with root difference numbers */}
-        <ChordLine>
-          {squashedChords.map((chordInfo, index) => (
-            <React.Fragment key={`line-4-${index}`}>
-              <ChordSpan
-                highlight={
-                  currentChordIndex !== null &&
-                  currentChordIndex >= chordInfo.startIndex &&
-                  currentChordIndex <= chordInfo.endIndex
-                }
-                onMouseEnter={() => handleChordHover(chordInfo.chord)}
-                onMouseLeave={handleChordLeave}
-                onClick={() => playChord(chordInfo.chord)}
-                left={index * (CHORD_WIDTH + GAP_WIDTH)}
-                top={`${getChordLevel(chordInfo)}px`}
-              >
-                {chordInfo.originalSuffix || "M"}
-              </ChordSpan>
-              {index < squashedChords.length - 1 &&
-                renderRootDifference(
-                  chordInfo,
-                  squashedChords[index + 1],
-                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
-                )}
-            </React.Fragment>
-          ))}
-        </ChordLine>
+            {/* Fourth repetition - simplified suffixes with root difference numbers */}
+            <ChordLine>
+              {squashedChords.map((chordInfo, index) => (
+                <React.Fragment key={`line-4-${index}`}>
+                  <ChordSpan
+                    highlight={
+                      currentChordIndex !== null &&
+                      currentChordIndex >= chordInfo.startIndex &&
+                      currentChordIndex <= chordInfo.endIndex
+                    }
+                    onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                    onMouseLeave={handleChordLeave}
+                    onClick={() => playChord(chordInfo.chord)}
+                    left={index * (CHORD_WIDTH + GAP_WIDTH)}
+                    top={`${getChordLevel(chordInfo)}px`}
+                  >
+                    {chordInfo.originalSuffix || "M"}
+                  </ChordSpan>
+                  {index < squashedChords.length - 1 &&
+                    renderRootDifference(
+                      chordInfo,
+                      squashedChords[index + 1],
+                      index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
+                    )}
+                </React.Fragment>
+              ))}
+            </ChordLine>
+          </>
+        )}
       </ChordLinesWrapper>
     </AlternativeChordContainer>
   );

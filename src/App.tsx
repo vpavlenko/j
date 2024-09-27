@@ -63,6 +63,13 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
   }
 `;
 
+const SongPreview = styled.div`
+  margin-top: 5px;
+  overflow-x: auto;
+  max-width: 300px;
+  height: 60px; // Adjust this value based on the height of your chord representation
+`;
+
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -91,6 +98,10 @@ function App() {
   const [songStats, setSongStats] = useState<{
     [key: string]: { nonParsedChords: number; distinctChords: number };
   }>({});
+
+  const [hoveredSongs, setHoveredSongs] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -381,6 +392,10 @@ function App() {
     );
   }, [selectedSongData]);
 
+  const handleMouseEnter = useCallback((filename: string) => {
+    setHoveredSongs((prev) => ({ ...prev, [filename]: true }));
+  }, []);
+
   const renderSongList = () => {
     const songsByChordCount: { [key: number]: Song[] } = {};
     const songsWithErrors: Song[] = [];
@@ -423,13 +438,30 @@ function App() {
                 </ColumnTitle>
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                   {songs.map((song) => (
-                    <li key={song.filename}>
+                    <li
+                      key={song.filename}
+                      onMouseEnter={() => handleMouseEnter(song.filename)}
+                    >
                       <SongLink
                         href={`#${song.filename}`}
                         onClick={() => handleSongClick(song.filename)}
                       >
                         {song.Title}
                       </SongLink>
+                      <SongPreview>
+                        {hoveredSongs[song.filename] && (
+                          <AlternativeChordRepresentation
+                            chords={song.chords
+                              .flat()
+                              .flatMap((chord) => chord.split(" "))}
+                            currentChordIndex={null}
+                            handleChordHover={() => {}}
+                            handleChordLeave={() => {}}
+                            playChord={() => {}}
+                            showOnlyLastRep={true}
+                          />
+                        )}
+                      </SongPreview>
                     </li>
                   ))}
                 </ul>
