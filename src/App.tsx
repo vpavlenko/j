@@ -47,7 +47,7 @@ const SongListContainer = styled.div`
 
 const Column = styled.div`
   flex: 1;
-  min-width: 200px;
+  min-width: 400px;
 `;
 
 const ColumnTitle = styled.h3`
