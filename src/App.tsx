@@ -12,12 +12,31 @@ import {
   ParsedChord,
 } from "./helpers/chordParser";
 import AlternativeChordRepresentation from "./components/AlternativeChordRepresentation";
+import styled from "styled-components";
 
 interface ChordEvent {
   chord: string;
   time: number;
   duration: number;
 }
+
+const TwoColumnLayout = styled.div`
+  display: flex;
+  width: 100%;
+`;
+
+const LeftColumn = styled.div`
+  width: 200px;
+  flex-shrink: 0;
+  padding-right: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px);
+`;
+
+const RightColumn = styled.div`
+  flex-grow: 1;
+  overflow-x: auto;
+`;
 
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
@@ -360,8 +379,8 @@ function App() {
           ))}
         </ul>
       ) : (
-        <div className="song-content">
-          <div className="original-chords">
+        <TwoColumnLayout>
+          <LeftColumn>
             <button onClick={() => setSelectedSong(null)}>Back to list</button>
             {selectedSongData && (
               <div>
@@ -418,8 +437,8 @@ function App() {
                 )}
               </div>
             )}
-          </div>
-          <div className="alternative-representation">
+          </LeftColumn>
+          <RightColumn>
             <h3>Alternative Chord Representation:</h3>
             <AlternativeChordRepresentation
               chords={flattenedChords}
@@ -427,8 +446,8 @@ function App() {
               handleChordHover={handleChordHover}
               handleChordLeave={handleChordLeave}
             />
-          </div>
-        </div>
+          </RightColumn>
+        </TwoColumnLayout>
       )}
       {hoverChord && !isHoveringChords && (
         <div

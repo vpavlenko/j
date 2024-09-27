@@ -3,14 +3,16 @@ import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import { getRootDifference } from "../utils"; // We'll need to create this function
 import styled from "styled-components";
 
-// Add these styled components at the top of the file
+// Update these styled components
 const AlternativeChordContainer = styled.div`
   overflow-x: auto;
   white-space: nowrap;
+  width: 100%;
 `;
 
 const ChordLine = styled.div`
   white-space: nowrap;
+  margin-bottom: 20px;
 `;
 
 const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
