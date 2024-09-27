@@ -1,6 +1,40 @@
 import React from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import { getRootDifference } from "../utils"; // We'll need to create this function
+import styled from "styled-components";
+
+// Add these styled components at the top of the file
+const AlternativeChordContainer = styled.div`
+  overflow-x: auto;
+  white-space: nowrap;
+`;
+
+const ChordLine = styled.div`
+  white-space: nowrap;
+`;
+
+const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
+  display: inline-block;
+  width: 40px;
+  margin: 0 5px;
+  cursor: pointer;
+  position: relative;
+  top: ${(props) => props.top || "0"};
+  ${(props) =>
+    props.highlight &&
+    `
+    background-color: yellow;
+    font-weight: bold;
+  `}
+`;
+
+const RootDifference = styled.span`
+  position: absolute;
+  transform: translate(-140%, 30%);
+  font-size: 0.7em;
+  color: red;
+  z-index: 1;
+`;
 
 interface ChordInfo {
   chord: string;
@@ -35,62 +69,37 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   });
 
   return (
-    <div
-      className="alternative-chord-representation"
-      style={{ overflowX: "auto", whiteSpace: "nowrap" }}
-    >
-      {/* First repetition - unchanged */}
-      <div className="chord-line" style={{ whiteSpace: "nowrap" }}>
+    <AlternativeChordContainer>
+      <ChordLine>
         {parsedChords.map((chordInfo, index) => (
-          <span
+          <ChordSpan
             key={`line-${index}`}
-            className={
-              currentChordIndex === index ? "chord highlight" : "chord"
-            }
+            highlight={currentChordIndex === index}
             onMouseEnter={() => handleChordHover(chordInfo.chord)}
             onMouseLeave={handleChordLeave}
-            style={{
-              display: "inline-block",
-              width: "40px",
-              margin: "0 5px",
-              cursor: "pointer",
-            }}
           >
             {chordInfo.chord}
-          </span>
+          </ChordSpan>
         ))}
-      </div>
+      </ChordLine>
 
-      {/* Second repetition - without root difference numbers */}
-      <div style={{ marginTop: "50px", whiteSpace: "nowrap" }}>
+      {/* Second repetition */}
+      <ChordLine style={{ marginTop: "50px" }}>
         {parsedChords.map((chordInfo, index) => (
-          <span
+          <ChordSpan
             key={`category-second-${index}`}
-            className={
-              currentChordIndex === index ? "chord highlight" : "chord"
-            }
+            highlight={currentChordIndex === index}
             onMouseEnter={() => handleChordHover(chordInfo.chord)}
             onMouseLeave={handleChordLeave}
-            style={{
-              display: "inline-block",
-              width: "40px",
-              margin: "0 5px",
-              cursor: "pointer",
-              position: "relative",
-              top: chordInfo.isMinor
-                ? "-30px"
-                : chordInfo.isMajor
-                ? "30px"
-                : "0",
-            }}
+            top={chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"}
           >
             {chordInfo.chord}
-          </span>
+          </ChordSpan>
         ))}
-      </div>
+      </ChordLine>
 
       {/* Third repetition - with root difference numbers */}
-      <div
+      <ChordLine
         style={{
           marginTop: "150px",
           position: "relative",
@@ -106,7 +115,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               position: "relative",
             }}
           >
-            <span
+            <ChordSpan
               className={
                 currentChordIndex === index ? "chord highlight" : "chord"
               }
@@ -114,7 +123,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               onMouseLeave={handleChordLeave}
               style={{
                 display: "inline-block",
-                width: "30px",
+                width: "00px",
                 cursor: "pointer",
                 position: "relative",
                 top: chordInfo.isMinor
@@ -125,29 +134,21 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               }}
             >
               {chordInfo.chord}
-            </span>
+            </ChordSpan>
             {index < parsedChords.length - 1 && (
-              <span
-                style={{
-                  position: "absolute",
-                  transform: "translate(-140%, 30%)",
-                  fontSize: "0.7em",
-                  color: "red",
-                  zIndex: 1,
-                }}
-              >
+              <RootDifference>
                 {getRootDifference(
                   chordInfo.root,
                   parsedChords[index + 1].root
                 )}
-              </span>
+              </RootDifference>
             )}
           </div>
         ))}
-      </div>
+      </ChordLine>
 
       {/* Fourth repetition - simplified suffixes with root difference numbers */}
-      <div
+      <ChordLine
         style={{
           marginTop: "150px",
           position: "relative",
@@ -163,7 +164,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               position: "relative",
             }}
           >
-            <span
+            <ChordSpan
               className={
                 currentChordIndex === index ? "chord highlight" : "chord"
               }
@@ -171,7 +172,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               onMouseLeave={handleChordLeave}
               style={{
                 display: "inline-block",
-                width: "30px",
+                width: "00px",
                 cursor: "pointer",
                 position: "relative",
                 top: chordInfo.isMinor
@@ -186,27 +187,19 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 : chordInfo.isMinor
                 ? "m"
                 : chordInfo.suffix || ""}
-            </span>
+            </ChordSpan>
             {index < parsedChords.length - 1 && (
-              <span
-                style={{
-                  position: "absolute",
-                  transform: "translate(-140%, 30%)",
-                  fontSize: "0.7em",
-                  color: "red",
-                  zIndex: 1,
-                }}
-              >
+              <RootDifference>
                 {getRootDifference(
                   chordInfo.root,
                   parsedChords[index + 1].root
                 )}
-              </span>
+              </RootDifference>
             )}
           </div>
         ))}
-      </div>
-    </div>
+      </ChordLine>
+    </AlternativeChordContainer>
   );
 };
 
