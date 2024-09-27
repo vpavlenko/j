@@ -67,8 +67,22 @@ function App() {
     [key: string]: { nonParsedChords: number; distinctChords: number };
   }>({});
 
+  useEffect(() => {
+    const handleHashChange = () => {
+      const songFromHash = window.location.hash.slice(1);
+      setSelectedSong(songFromHash || null);
+    };
+
+    window.addEventListener("hashchange", handleHashChange);
+    handleHashChange(); // Set initial state based on URL
+
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
   const handleSongClick = (filename: string) => {
-    setSelectedSong(filename);
+    window.location.hash = filename;
   };
 
   const selectedSongData = CORPUS.find(
@@ -415,7 +429,9 @@ function App() {
       ) : (
         <TwoColumnLayout>
           <LeftColumn>
-            <button onClick={() => setSelectedSong(null)}>Back to list</button>
+            <a href="#" onClick={() => window.history.back()}>
+              Back to list
+            </a>
             {selectedSongData && (
               <div>
                 <h2>{selectedSongData.Title}</h2>
