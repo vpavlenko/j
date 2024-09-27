@@ -419,18 +419,29 @@ function App() {
       Tone.Transport.stop();
       Tone.Transport.cancel();
 
-      const sequence = getChordSequence(song);
-      const bpm = 120; // You can adjust this or make it dynamic based on the song
+      const bpm = 120;
       Tone.Transport.bpm.value = bpm;
       Tone.Transport.timeSignature = song.TimeSig;
 
       const secondsPerBeat = 60 / bpm;
       const secondsPerBar = secondsPerBeat * song.TimeSig[0];
 
-      sequence.forEach(({ chord, time, duration }, index) => {
+      // Get the last rep of chords (already squashed)
+      const lastRepChords = song.chords
+        .flat()
+        .flatMap((chord) => chord.split(" "));
+
+      // Remove consecutive duplicates
+      const uniqueChords = lastRepChords.filter(
+        (chord, index, array) => index === 0 || chord !== array[index - 1]
+      );
+
+      const chordDuration = secondsPerBar; // Fixed duration for each chord
+      const totalTime = uniqueChords.length * chordDuration;
+
+      uniqueChords.forEach((chord, index) => {
+        const chordTime = index * chordDuration;
         const midiNotes = getMidiNotesForChord(chord);
-        const chordTime = (time / song.TimeSig[0]) * secondsPerBar;
-        const chordDuration = (duration / song.TimeSig[0]) * secondsPerBar;
 
         Tone.Transport.schedule((playTime) => {
           if (midiNotes.length > 0) {
@@ -441,10 +452,6 @@ function App() {
           }, playTime);
         }, chordTime);
       });
-
-      const totalTime =
-        sequence.reduce((acc, { duration }) => acc + duration, 0) *
-        (secondsPerBar / song.TimeSig[0]);
 
       Tone.Transport.schedule(() => {
         setPreviewPlayingSong(null);
