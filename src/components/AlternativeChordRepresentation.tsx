@@ -10,7 +10,7 @@ import styled from "styled-components";
 // Add these constants at the top of the file, after the imports
 const CHORD_WIDTH = 17;
 const GAP_WIDTH = 12;
-const CHORD_VERTICAL_OFFSET = 20;
+const CHORD_VERTICAL_OFFSET = 15;
 
 // Add this new constant
 const CHORD_LEVEL = {
@@ -71,6 +71,8 @@ const ChordRoot = styled.div`
 const ChordSuffix = styled.div`
   font-size: 0.8em;
   font-weight: bold;
+  display: flex;
+  align-items: baseline;
 `;
 
 const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
@@ -115,6 +117,24 @@ interface Props {
   disableVerticalScroll?: boolean; // Add this new prop
 }
 
+const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
+  const prefixRegex = /^(maj|7|M|m|o|9|11|13)/;
+  const match = suffix.match(prefixRegex);
+
+  if (match) {
+    const prefix = match[0];
+    const postfix = suffix.slice(prefix.length);
+    return (
+      <span style={{ whiteSpace: "nowrap" }}>
+        {prefix}
+        <sup>{postfix}</sup>
+      </span>
+    );
+  }
+
+  return <>{suffix}</>;
+};
+
 const TwoLineChord: React.FC<{
   chord: string;
   root: string;
@@ -144,7 +164,9 @@ const TwoLineChord: React.FC<{
     top={top}
   >
     <ChordRoot>{root}</ChordRoot>
-    <ChordSuffix>{suffix || "M"}</ChordSuffix>
+    <ChordSuffix>
+      <FormattedChordSuffix suffix={suffix || "M"} />
+    </ChordSuffix>
   </ChordSpan>
 );
 
@@ -207,7 +229,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       <RootDifference
         backgroundColor={backgroundColor}
         left={left}
-        style={{ top: `${averageLevel + GAP_WIDTH * 0.7}px` }}
+        style={{ top: `${averageLevel + 11}px` }}
       >
         {difference}
       </RootDifference>
@@ -234,7 +256,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   left={index * (CHORD_WIDTH + GAP_WIDTH)}
                   top={`${getChordLevel(chordInfo)}px`}
                 >
-                  {chordInfo.originalSuffix || "M"}
+                  <FormattedChordSuffix
+                    suffix={chordInfo.originalSuffix || "M"}
+                  />
                 </ChordSpan>
                 {index < squashedChords.length - 1 &&
                   renderRootDifference(
@@ -338,7 +362,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                     left={index * (CHORD_WIDTH + GAP_WIDTH)}
                     top={`${getChordLevel(chordInfo)}px`}
                   >
-                    {chordInfo.originalSuffix || "M"}
+                    <FormattedChordSuffix
+                      suffix={chordInfo.originalSuffix || "M"}
+                    />
                   </ChordSpan>
                   {index < squashedChords.length - 1 &&
                     renderRootDifference(
