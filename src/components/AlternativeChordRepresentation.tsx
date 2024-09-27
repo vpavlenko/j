@@ -132,7 +132,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
         ))}
       </div>
 
-      {/* Fourth repetition - only suffixes with root difference numbers */}
+      {/* Fourth repetition - simplified suffixes with root difference numbers */}
       <div style={{ marginTop: "150px", position: "relative" }}>
         {parsedChords.map((chordInfo, index) => (
           <div
@@ -161,7 +161,11 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   : "0",
               }}
             >
-              {chordInfo.suffix || ""}
+              {chordInfo.isMajor
+                ? "."
+                : chordInfo.isMinor
+                ? "m"
+                : chordInfo.suffix || ""}
             </span>
             {index < parsedChords.length - 1 && (
               <span
