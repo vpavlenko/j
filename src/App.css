@@ -1,66 +1,64 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.App {
+  display: flex;
+  flex-direction: column;
+}
+
+.song-content {
+  display: flex;
+}
+
+.original-chords {
+  width: 200px;
+  padding-right: 20px;
+  overflow-y: auto;
+  max-height: calc(100vh - 100px); /* Adjust based on your header height */
+}
+
+.alternative-representation {
+  flex-grow: 1;
+  overflow-x: auto;
 }
 
 .chord-bar {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
 }
 
 .chord {
-    margin-right: 5px;
+  margin-right: 2px;
 }
 
 .highlight {
-    background-color: yellow;
-    font-weight: bold;
+  background-color: yellow;
+  font-weight: bold;
 }
 
 .chord-info {
-  margin-top: 20px;
-  padding: 10px;
+  margin-top: 10px;
+  padding: 5px;
   background-color: #f0f0f0;
   border-radius: 5px;
 }
 
 .chord-info p {
-  margin: 5px 0;
-}
-
-.grouped-chords {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.chord-line {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.minor-chords {
-  color: #6a0dad;
-}
-
-.major-chords {
-  color: #1e90ff;
-}
-
-.other-chords {
-  color: #ff4500;
+  margin: 2px 0;
 }
 
 .alternative-chord-representation {
   display: flex;
   flex-direction: column;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .chord-line {
-  margin-bottom: 10px;
+  margin-bottom: 5px;
 }
 
 .chord-categories {
@@ -71,19 +69,7 @@
 .minor-chords,
 .dominant-chords,
 .major-chords {
-  height: 30px;
+  height: 20px;
   display: flex;
   align-items: center;
-}
-
-.minor-chords {
-  justify-content: flex-start;
-}
-
-.dominant-chords {
-  justify-content: center;
-}
-
-.major-chords {
-  justify-content: flex-end;
 }

@@ -360,8 +360,8 @@ function App() {
           ))}
         </ul>
       ) : (
-        <div style={{ display: "flex" }}>
-          <div style={{ flex: 1 }}>
+        <div className="song-content">
+          <div className="original-chords">
             <button onClick={() => setSelectedSong(null)}>Back to list</button>
             {selectedSongData && (
               <div>
@@ -419,7 +419,7 @@ function App() {
               </div>
             )}
           </div>
-          <div style={{ flex: 1, marginLeft: "20px" }}>
+          <div className="alternative-representation">
             <h3>Alternative Chord Representation:</h3>
             <AlternativeChordRepresentation
               chords={flattenedChords}
