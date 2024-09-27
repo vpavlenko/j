@@ -37,11 +37,12 @@ const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
 `;
 
 const ChordRoot = styled.div`
-  font-weight: bold;
+  font-weight: normal;
 `;
 
 const ChordSuffix = styled.div`
   font-size: 0.8em;
+  font-weight: bold;
 `;
 
 const RootDifference = styled.span`
@@ -56,6 +57,7 @@ interface ChordInfo {
   chord: string;
   root: string;
   suffix: string;
+  originalSuffix: string;
   isMajor: boolean;
   isMinor: boolean;
 }
@@ -99,6 +101,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       chord,
       root: parsedChord.root,
       suffix: parsedChord.suffix,
+      originalSuffix: parsedChord.originalSuffix,
       isMajor: parsedChord.isMajor,
       isMinor: parsedChord.isMinor,
     };
@@ -114,7 +117,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               key={`line-1-${index}`}
               chord={chordInfo.chord}
               root={chordInfo.root}
-              suffix={chordInfo.suffix}
+              suffix={chordInfo.originalSuffix || "."} // Use originalSuffix here
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
@@ -129,7 +132,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               key={`line-2-${index}`}
               chord={chordInfo.chord}
               root={chordInfo.root}
-              suffix={chordInfo.suffix}
+              suffix={chordInfo.originalSuffix} // Use originalSuffix here
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
@@ -154,7 +157,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               <TwoLineChord
                 chord={chordInfo.chord}
                 root={chordInfo.root}
-                suffix={chordInfo.suffix}
+                suffix={chordInfo.originalSuffix} // Use originalSuffix here
                 highlight={currentChordIndex === index}
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
@@ -193,11 +196,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
                 }
               >
-                {chordInfo.isMajor
-                  ? "."
-                  : chordInfo.isMinor
-                  ? "m"
-                  : chordInfo.suffix || ""}
+                {chordInfo.originalSuffix || "."}{" "}
+                {/* Use originalSuffix here */}
               </ChordSpan>
               {index < parsedChords.length - 1 && (
                 <RootDifference>

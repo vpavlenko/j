@@ -3,6 +3,7 @@ import guitarChords from "../guitarChords";
 export interface ParsedChord {
   root: string;
   suffix: string;
+  originalSuffix: string; // Add this line
   isMajor: boolean;
   isMinor: boolean;
   error?: string;
@@ -44,12 +45,14 @@ export function parseChordName(chordName: string): ParsedChord {
     }
   }
 
+  const originalSuffix = suffix; // Store the original suffix
   suffix = suffixMapping(suffix);
 
   if (!root) {
     return {
       root: "",
       suffix: "",
+      originalSuffix: "", // Add this line
       isMajor: false,
       isMinor: false,
       error: `Unable to parse chord: ${chordName}`,
@@ -59,7 +62,7 @@ export function parseChordName(chordName: string): ParsedChord {
   const isMajor = isMajorChord(suffix);
   const isMinor = isMinorChord(suffix);
 
-  return { root, suffix, isMajor, isMinor };
+  return { root, suffix, originalSuffix, isMajor, isMinor }; // Include originalSuffix
 }
 
 export const suffixMapping = (suffix: string): string => {
