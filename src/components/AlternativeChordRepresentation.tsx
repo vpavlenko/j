@@ -119,7 +119,10 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     nextChord: ChordInfo
   ) => {
     const difference = getRootDifference(currentChord.root, nextChord.root);
-    const color = getRootDifferenceColor(difference);
+    const color =
+      difference === "?"
+        ? "gray"
+        : getRootDifferenceColor(parseInt(difference, 10));
 
     return <RootDifference color={color}>{difference}</RootDifference>;
   };

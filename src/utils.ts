@@ -1,43 +1,5 @@
 import * as Tone from "tone";
 
-const noteOrder = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-];
-
-const flatToSharp: { [key: string]: string } = {
-  Db: "C#",
-  Eb: "D#",
-  Gb: "F#",
-  Ab: "G#",
-  Bb: "A#",
-};
-
-const rootToNumber: { [key: string]: number } = {
-  C: 0,
-  "C#": 1,
-  D: 2,
-  "D#": 3,
-  E: 4,
-  F: 5,
-  "F#": 6,
-  G: 7,
-  "G#": 8,
-  A: 9,
-  "A#": 10,
-  B: 11,
-};
-
 export function strum(
   sampler: Tone.Sampler,
   midiNotes: number[],
@@ -52,47 +14,58 @@ export function strum(
   });
 }
 
-export function getRootDifference(root1: string, root2: string): number {
-  console.log(`Calculating root difference: ${root1} to ${root2}`);
+export function getRootDifference(root1: string, root2: string): string {
+  const noteOrder = [
+    "C",
+    "Csharp",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "Fsharp",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B",
+  ];
 
-  const num1 = rootToNumber[root1];
-  const num2 = rootToNumber[root2];
+  const index1 = noteOrder.indexOf(root1);
+  const index2 = noteOrder.indexOf(root2);
 
-  console.log(`Root numbers: ${num1}, ${num2}`);
-
-  if (num1 === undefined || num2 === undefined) {
-    console.warn(`Invalid root: ${num1 === undefined ? root1 : root2}`);
-    return 0;
+  if (index1 === -1 || index2 === -1) {
+    return "?";
   }
 
-  let difference = num2 - num1;
+  let difference = index2 - index1;
+  if (difference < 0) difference += 12;
 
-  // Ensure the difference is in the range -5 to 6
+  // Map 0..11 to -6..+5
   if (difference > 6) {
     difference -= 12;
-  } else if (difference < -5) {
-    difference += 12;
   }
 
-  console.log(`Calculated difference: ${difference}`);
-
-  return difference;
+  return difference.toString();
 }
 
 export function getRootDifferenceColor(difference: number): string {
-  const colorMap: { [key: number]: string } = {
+  if (isNaN(difference)) {
+    return "gray";
+  }
+
+  const colorMap: { [key: string]: string } = {
     0: "gray",
-    5: "black",
     1: "#1E90FF", // Dodger Blue
     2: "lime", // Orange Red
     3: "darkgreen", // Lime Green
     4: "#FF1493", // Deep Pink
+    5: "black",
     6: "#8A2BE2", // Blue Violet
-    "-1": "blue", // Red
-    "-2": "#00CED1", // Dark Turquoise
-    "-3": "#FFD700", // Gold
-    "-4": "#9932CC", // Dark Orchid
     "-5": "red", // Green
+    "-4": "#00CED1", // Dark Turquoise
+    "-3": "#FFD700", // Gold
+    "-2": "#9932CC", // Dark Orchid
+    "-1": "blue", // Red
   };
 
   return colorMap[difference] || "black";
