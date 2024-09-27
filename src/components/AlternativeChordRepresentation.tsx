@@ -1,6 +1,6 @@
 import React from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
-import { getRootDifference } from "../utils";
+import { getRootDifference, getRootDifferenceColor } from "../utils";
 import styled from "styled-components";
 
 // Add this constant at the top of the file, after the imports
@@ -49,11 +49,11 @@ const ChordSuffix = styled.div`
   font-weight: bold;
 `;
 
-const RootDifference = styled.span`
+const RootDifference = styled.span<{ color: string }>`
   position: absolute;
-  transform: translate(-200%, 30%);
-  font-size: 0.7em;
-  color: red;
+  transform: translate(150%, -200%);
+  font-size: 1.2em;
+  color: ${(props) => props.color};
   font-weight: bold;
   z-index: 1;
 `;
@@ -166,7 +166,14 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               }}
             >
               {index < parsedChords.length - 1 && (
-                <RootDifference>
+                <RootDifference
+                  color={getRootDifferenceColor(
+                    getRootDifference(
+                      chordInfo.originalRoot,
+                      parsedChords[index + 1].originalRoot
+                    )
+                  )}
+                >
                   {getRootDifference(
                     chordInfo.originalRoot,
                     parsedChords[index + 1].originalRoot
@@ -204,7 +211,14 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               }}
             >
               {index < parsedChords.length - 1 && (
-                <RootDifference>
+                <RootDifference
+                  color={getRootDifferenceColor(
+                    getRootDifference(
+                      chordInfo.originalRoot,
+                      parsedChords[index + 1].originalRoot
+                    )
+                  )}
+                >
                   {getRootDifference(
                     chordInfo.originalRoot,
                     parsedChords[index + 1].originalRoot

@@ -29,6 +29,25 @@ export function strum(
   });
 }
 
+export function getRootDifferenceColor(difference: number): string {
+  const colorMap: { [key: number]: string } = {
+    0: "gray",
+    5: "black",
+    1: "#1E90FF", // Dodger Blue
+    2: "lime", // Orange Red
+    3: "darkgreen", // Lime Green
+    4: "#FF1493", // Deep Pink
+    6: "#8A2BE2", // Blue Violet
+    "-1": "blue", // Red
+    "-2": "#00CED1", // Dark Turquoise
+    "-3": "#FFD700", // Gold
+    "-4": "#9932CC", // Dark Orchid
+    "-5": "red", // Green
+  };
+
+  return colorMap[difference] || "black";
+}
+
 export function getRootDifference(root1: string, root2: string): number {
   const index1 = noteOrder.indexOf(root1);
   const index2 = noteOrder.indexOf(root2);
