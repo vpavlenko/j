@@ -54,18 +54,17 @@ export function getRootDifferenceColor(difference: number): string {
   }
 
   const colorMap: { [key: string]: string } = {
-    0: "gray",
-    1: "#1E90FF", // Dodger Blue
-    2: "lime", // Orange Red
-    3: "darkgreen", // Lime Green
-    4: "#FF1493", // Deep Pink
-    5: "black",
-    6: "#8A2BE2", // Blue Violet
-    "-5": "red", // Green
-    "-4": "#00CED1", // Dark Turquoise
-    "-3": "#FFD700", // Gold
-    "-2": "#9932CC", // Dark Orchid
-    "-1": "blue", // Red
+    1: "#FF8C00", // Dark Orange
+    2: "#006400", // Dark Green
+    3: "#00008B", // Dark Blue
+    4: "#8B008B", // Dark Purple
+    5: "#000000", // Black
+    "-5": "#aaa", // Gray
+    "-4": "#DA70D6", // Light Purple (Orchid)
+    "-3": "#1E90FF", // Light Blue (Dodger Blue)
+    "-2": "#90EE90", // Light Green
+    "-1": "#FFA500", // Light Orange
+    "6": "turquoise",
   };
 
   return colorMap[difference] || "black";
@@ -85,4 +84,8 @@ export function getContrastColor(hexColor: string): string {
 
   // Return black for bright colors and white for dark colors
   return luminance > 0.5 ? "#000000" : "#FFFFFF";
+}
+
+export function getRootDifferenceSymbol(difference: number): string {
+  return difference === 0 ? "=" : difference.toString();
 }
