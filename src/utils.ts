@@ -1,5 +1,20 @@
 import * as Tone from "tone";
 
+const noteOrder = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+
 export function strum(
   sampler: Tone.Sampler,
   midiNotes: number[],
@@ -12,4 +27,20 @@ export function strum(
     const note = Tone.Frequency(midi, "midi").toNote();
     sampler.triggerAttackRelease(note, duration, noteTime);
   });
+}
+
+export function getRootDifference(root1: string, root2: string): number {
+  const index1 = noteOrder.indexOf(root1);
+  const index2 = noteOrder.indexOf(root2);
+
+  if (index1 === -1 || index2 === -1) {
+    return 0; // Return 0 if either root is not found
+  }
+
+  let difference = index2 - index1;
+  if (difference < 0) {
+    difference += 12; // Ensure positive difference
+  }
+
+  return difference;
 }
