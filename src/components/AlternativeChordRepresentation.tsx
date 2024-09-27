@@ -90,6 +90,8 @@ interface Props {
   currentChordIndex: number | null;
   handleChordHover: (chord: string) => void;
   handleChordLeave: () => void;
+  // Add this new prop
+  playChord: (chord: string) => void;
 }
 
 const TwoLineChord: React.FC<{
@@ -99,13 +101,24 @@ const TwoLineChord: React.FC<{
   highlight: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onClick: () => void; // Add this new prop
   left: number;
   top?: string;
-}> = ({ root, suffix, highlight, onMouseEnter, onMouseLeave, left, top }) => (
+}> = ({
+  root,
+  suffix,
+  highlight,
+  onMouseEnter,
+  onMouseLeave,
+  onClick,
+  left,
+  top,
+}) => (
   <ChordSpan
     highlight={highlight}
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
+    onClick={onClick} // Add this onClick handler
     left={left}
     top={top}
   >
@@ -119,6 +132,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   currentChordIndex,
   handleChordHover,
   handleChordLeave,
+  playChord, // Add this new prop
 }) => {
   const parsedChords: ChordInfo[] = chords.map((chord) => {
     const parsedChord: ParsedChord = parseChordName(chord);
@@ -177,6 +191,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
+              onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
               left={index * (CHORD_WIDTH + GAP_WIDTH)}
             />
           ))}
@@ -197,6 +212,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               }
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
+              onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
               left={index * (CHORD_WIDTH + GAP_WIDTH)}
               top={
                 chordInfo.isMinor
@@ -230,6 +246,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
+                onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
                 left={index * (CHORD_WIDTH + GAP_WIDTH)}
                 top={
                   chordInfo.isMinor
@@ -261,6 +278,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 }
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
+                onClick={() => playChord(chordInfo.chord)} // Add this onClick handler
                 left={index * (CHORD_WIDTH + GAP_WIDTH)}
                 top={
                   chordInfo.isMinor

@@ -13,6 +13,7 @@ import {
 } from "./helpers/chordParser";
 import AlternativeChordRepresentation from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
+import { Sampler } from "tone";
 
 interface ChordEvent {
   chord: string;
@@ -66,7 +67,7 @@ function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [chordSequence, setChordSequence] = useState<ChordEvent[]>([]);
-  const [sampler, setSampler] = useState<Tone.Sampler | null>(null);
+  const [sampler, setSampler] = useState<Sampler | null>(null);
   const bpm = 120;
 
   const [currentChordIndex, setCurrentChordIndex] = useState<number | null>(
@@ -477,6 +478,24 @@ function App() {
     );
   };
 
+  const playChord = useCallback(
+    (chord: string) => {
+      if (sampler) {
+        // Stop any ongoing playback
+        sampler.releaseAll();
+
+        // Get the notes for the chord
+        const midiNotes = getMidiNotesForChord(chord);
+
+        // Play the chord
+        if (midiNotes.length > 0) {
+          strum(sampler, midiNotes, 1, Tone.now());
+        }
+      }
+    },
+    [sampler]
+  );
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
@@ -552,6 +571,7 @@ function App() {
               currentChordIndex={currentChordIndex}
               handleChordHover={handleChordHover}
               handleChordLeave={handleChordLeave}
+              playChord={playChord}
             />
           </RightColumn>
         </TwoColumnLayout>
