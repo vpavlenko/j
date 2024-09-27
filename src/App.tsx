@@ -56,7 +56,7 @@ const ColumnTitle = styled.h3`
 
 const SongLink = styled.a<{ hasErrors?: boolean }>`
   text-decoration: none;
-  color: ${(props) => (props.hasErrors ? "red" : "inherit")};
+  color: ${(props) => (props.hasErrors ? "red" : "gray")};
 
   &:hover {
     text-decoration: underline;
@@ -449,6 +449,7 @@ function App() {
                       <SongPreview>
                         {hoveredSongs[song.filename] && (
                           <AlternativeChordRepresentation
+                            key={`${song.filename}`}
                             chords={song.chords
                               .flat()
                               .flatMap((chord) => chord.split(" "))}
