@@ -421,7 +421,7 @@ function App() {
       <h1>Jazz Standards Corpus</h1>
       {!selectedSong ? (
         <ul>
-          {CORPUS.map((song) => (
+          {CORPUS.sort((a, b) => a.Title.localeCompare(b.Title)).map((song) => (
             <li
               key={song.filename}
               style={{
