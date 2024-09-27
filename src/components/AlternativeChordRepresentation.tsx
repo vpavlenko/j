@@ -57,6 +57,7 @@ const RootDifference = styled.span`
 interface ChordInfo {
   chord: string;
   root: string;
+  originalRoot: string;
   suffix: string;
   originalSuffix: string;
   isMajor: boolean;
@@ -86,7 +87,7 @@ const TwoLineChord: React.FC<{
     top={top}
   >
     <ChordRoot>{root}</ChordRoot>
-    <ChordSuffix>{suffix}</ChordSuffix>
+    <ChordSuffix>{suffix || "M"}</ChordSuffix>
   </ChordSpan>
 );
 
@@ -101,6 +102,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     return {
       chord,
       root: parsedChord.root,
+      originalRoot: parsedChord.originalRoot,
       suffix: parsedChord.suffix,
       originalSuffix: parsedChord.originalSuffix,
       isMajor: parsedChord.isMajor,
@@ -117,8 +119,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             <TwoLineChord
               key={`line-1-${index}`}
               chord={chordInfo.chord}
-              root={chordInfo.root}
-              suffix={chordInfo.originalSuffix || "M"} // Use originalSuffix here
+              root={chordInfo.originalRoot}
+              suffix={chordInfo.originalSuffix}
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
@@ -132,8 +134,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             <TwoLineChord
               key={`line-2-${index}`}
               chord={chordInfo.chord}
-              root={chordInfo.root}
-              suffix={chordInfo.originalSuffix} // Use originalSuffix here
+              root={chordInfo.originalRoot}
+              suffix={chordInfo.originalSuffix}
               highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
@@ -155,10 +157,18 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
+              {index < parsedChords.length - 1 && (
+                <RootDifference>
+                  {getRootDifference(
+                    chordInfo.originalRoot,
+                    parsedChords[index + 1].originalRoot
+                  )}
+                </RootDifference>
+              )}
               <TwoLineChord
                 chord={chordInfo.chord}
-                root={chordInfo.root}
-                suffix={chordInfo.originalSuffix} // Use originalSuffix here
+                root={chordInfo.originalRoot}
+                suffix={chordInfo.originalSuffix}
                 highlight={currentChordIndex === index}
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
                 onMouseLeave={handleChordLeave}
@@ -166,14 +176,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
                 }
               />
-              {index < parsedChords.length - 1 && (
-                <RootDifference>
-                  {getRootDifference(
-                    chordInfo.root,
-                    parsedChords[index + 1].root
-                  )}
-                </RootDifference>
-              )}
             </div>
           ))}
         </ChordLine>
@@ -189,6 +191,14 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
+              {index < parsedChords.length - 1 && (
+                <RootDifference>
+                  {getRootDifference(
+                    chordInfo.originalRoot,
+                    parsedChords[index + 1].originalRoot
+                  )}
+                </RootDifference>
+              )}
               <ChordSpan
                 highlight={currentChordIndex === index}
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}
@@ -197,17 +207,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
                 }
               >
-                {chordInfo.originalSuffix || "M"}{" "}
-                {/* Use originalSuffix here */}
+                {chordInfo.originalSuffix}
               </ChordSpan>
-              {index < parsedChords.length - 1 && (
-                <RootDifference>
-                  {getRootDifference(
-                    chordInfo.root,
-                    parsedChords[index + 1].root
-                  )}
-                </RootDifference>
-              )}
             </div>
           ))}
         </ChordLine>

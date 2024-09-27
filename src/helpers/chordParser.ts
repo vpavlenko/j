@@ -2,8 +2,9 @@ import guitarChords from "../guitarChords";
 
 export interface ParsedChord {
   root: string;
+  originalRoot: string; // Add this line
   suffix: string;
-  originalSuffix: string; // Add this line
+  originalSuffix: string;
   isMajor: boolean;
   isMinor: boolean;
   error?: string;
@@ -12,6 +13,7 @@ export interface ParsedChord {
 export function parseChordName(chordName: string): ParsedChord {
   const keys = guitarChords.keys;
   let root = "";
+  let originalRoot = ""; // Add this line
   let suffix = "";
 
   const rootMapping: { [key: string]: string } = {
@@ -39,20 +41,22 @@ export function parseChordName(chordName: string): ParsedChord {
     for (let i = 0; i < keys.length; i++) {
       if (chordName.startsWith(keys[i])) {
         root = keys[i];
+        originalRoot = keys[i]; // Store the original root
         suffix = chordName.slice(keys[i].length);
         break;
       }
     }
   }
 
-  const originalSuffix = suffix; // Store the original suffix
+  const originalSuffix = suffix;
   suffix = suffixMapping(suffix);
 
   if (!root) {
     return {
       root: "",
+      originalRoot: "", // Add this line
       suffix: "",
-      originalSuffix: "", // Add this line
+      originalSuffix: "",
       isMajor: false,
       isMinor: false,
       error: `Unable to parse chord: ${chordName}`,
@@ -62,7 +66,7 @@ export function parseChordName(chordName: string): ParsedChord {
   const isMajor = isMajorChord(suffix);
   const isMinor = isMinorChord(suffix);
 
-  return { root, suffix, originalSuffix, isMajor, isMinor }; // Include originalSuffix
+  return { root, originalRoot, suffix, originalSuffix, isMajor, isMinor }; // Include originalRoot
 }
 
 export const suffixMapping = (suffix: string): string => {
