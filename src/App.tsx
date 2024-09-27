@@ -14,6 +14,7 @@ import {
 import AlternativeChordRepresentation from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
+import { FaVolumeUp } from "react-icons/fa";
 
 interface ChordEvent {
   chord: string;
@@ -68,6 +69,16 @@ const SongPreview = styled.div`
   height: 100px; // Adjust this value based on the height of your chord representation
 `;
 
+const SongItem = styled.li`
+  position: relative;
+`;
+
+const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
+  margin-left: 5px;
+  cursor: pointer;
+  color: ${(props) => (props.isPlaying ? "#4CAF50" : "inherit")};
+`;
+
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -100,6 +111,13 @@ function App() {
   const [hoveredSongs, setHoveredSongs] = useState<{ [key: string]: boolean }>(
     {}
   );
+
+  const [previewPlayingSong, setPreviewPlayingSong] = useState<string | null>(
+    null
+  );
+  const [previewCurrentChordIndex, setPreviewCurrentChordIndex] = useState<
+    number | null
+  >(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -394,6 +412,67 @@ function App() {
     setHoveredSongs((prev) => ({ ...prev, [filename]: true }));
   }, []);
 
+  const playPreview = useCallback(
+    (song: Song) => {
+      if (!sampler) return;
+
+      Tone.Transport.stop();
+      Tone.Transport.cancel();
+
+      const sequence = getChordSequence(song);
+      const bpm = 120; // You can adjust this or make it dynamic based on the song
+      Tone.Transport.bpm.value = bpm;
+      Tone.Transport.timeSignature = song.TimeSig;
+
+      const secondsPerBeat = 60 / bpm;
+      const secondsPerBar = secondsPerBeat * song.TimeSig[0];
+
+      sequence.forEach(({ chord, time, duration }, index) => {
+        const midiNotes = getMidiNotesForChord(chord);
+        const chordTime = (time / song.TimeSig[0]) * secondsPerBar;
+        const chordDuration = (duration / song.TimeSig[0]) * secondsPerBar;
+
+        Tone.Transport.schedule((playTime) => {
+          if (midiNotes.length > 0) {
+            strum(sampler, midiNotes, chordDuration, playTime);
+          }
+          Tone.Draw.schedule(() => {
+            setPreviewCurrentChordIndex(index);
+          }, playTime);
+        }, chordTime);
+      });
+
+      const totalTime =
+        sequence.reduce((acc, { duration }) => acc + duration, 0) *
+        (secondsPerBar / song.TimeSig[0]);
+
+      Tone.Transport.schedule(() => {
+        setPreviewPlayingSong(null);
+        setPreviewCurrentChordIndex(null);
+      }, totalTime);
+
+      Tone.Transport.start();
+    },
+    [sampler]
+  );
+
+  const handleSongPreviewHover = useCallback(
+    (song: Song) => {
+      if (!sampler) return;
+
+      setPreviewPlayingSong(song.filename);
+      playPreview(song);
+    },
+    [sampler, playPreview]
+  );
+
+  const handleSongPreviewLeave = useCallback(() => {
+    setPreviewPlayingSong(null);
+    setPreviewCurrentChordIndex(null);
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
+  }, []);
+
   const renderSongList = () => {
     const songsByChordCount: { [key: number]: Song[] } = {};
     const songsWithErrors: Song[] = [];
@@ -436,7 +515,7 @@ function App() {
                 </ColumnTitle>
                 <ul style={{ listStyleType: "none", padding: 0 }}>
                   {songs.map((song) => (
-                    <li
+                    <SongItem
                       key={song.filename}
                       onMouseEnter={() => handleMouseEnter(song.filename)}
                     >
@@ -446,14 +525,24 @@ function App() {
                       >
                         {song.Title}
                       </SongLink>
+                      <VolumeIcon
+                        isPlaying={previewPlayingSong === song.filename}
+                        onMouseEnter={() => handleSongPreviewHover(song)}
+                        onMouseLeave={handleSongPreviewLeave}
+                      />
                       <SongPreview>
-                        {hoveredSongs[song.filename] && (
+                        {(hoveredSongs[song.filename] ||
+                          previewPlayingSong === song.filename) && (
                           <AlternativeChordRepresentation
                             key={`${song.filename}`}
                             chords={song.chords
                               .flat()
                               .flatMap((chord) => chord.split(" "))}
-                            currentChordIndex={null}
+                            currentChordIndex={
+                              previewPlayingSong === song.filename
+                                ? previewCurrentChordIndex
+                                : null
+                            }
                             handleChordHover={() => {}}
                             handleChordLeave={() => {}}
                             playChord={() => {}}
@@ -462,7 +551,7 @@ function App() {
                           />
                         )}
                       </SongPreview>
-                    </li>
+                    </SongItem>
                   ))}
                 </ul>
               </Column>
