@@ -35,9 +35,12 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   });
 
   return (
-    <div className="alternative-chord-representation">
+    <div
+      className="alternative-chord-representation"
+      style={{ overflowX: "auto", whiteSpace: "nowrap" }}
+    >
       {/* First repetition - unchanged */}
-      <div className="chord-line">
+      <div className="chord-line" style={{ whiteSpace: "nowrap" }}>
         {parsedChords.map((chordInfo, index) => (
           <span
             key={`line-${index}`}
@@ -46,7 +49,12 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             }
             onMouseEnter={() => handleChordHover(chordInfo.chord)}
             onMouseLeave={handleChordLeave}
-            style={{ margin: "0 5px", cursor: "pointer" }}
+            style={{
+              display: "inline-block",
+              width: "40px",
+              margin: "0 5px",
+              cursor: "pointer",
+            }}
           >
             {chordInfo.chord}
           </span>
@@ -54,7 +62,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       </div>
 
       {/* Second repetition - without root difference numbers */}
-      <div style={{ marginTop: "50px" }}>
+      <div style={{ marginTop: "50px", whiteSpace: "nowrap" }}>
         {parsedChords.map((chordInfo, index) => (
           <span
             key={`category-second-${index}`}
@@ -65,7 +73,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             onMouseLeave={handleChordLeave}
             style={{
               display: "inline-block",
-              width: "30px",
+              width: "40px",
               margin: "0 5px",
               cursor: "pointer",
               position: "relative",
@@ -82,7 +90,13 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       </div>
 
       {/* Third repetition - with root difference numbers */}
-      <div style={{ marginTop: "150px", position: "relative" }}>
+      <div
+        style={{
+          marginTop: "150px",
+          position: "relative",
+          whiteSpace: "nowrap",
+        }}
+      >
         {parsedChords.map((chordInfo, index) => (
           <div
             key={`category-third-${index}`}
@@ -133,7 +147,13 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       </div>
 
       {/* Fourth repetition - simplified suffixes with root difference numbers */}
-      <div style={{ marginTop: "150px", position: "relative" }}>
+      <div
+        style={{
+          marginTop: "150px",
+          position: "relative",
+          whiteSpace: "nowrap",
+        }}
+      >
         {parsedChords.map((chordInfo, index) => (
           <div
             key={`category-fourth-${index}`}
