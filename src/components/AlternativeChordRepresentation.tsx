@@ -270,7 +270,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                     : "0"
                 }
               >
-                {chordInfo.originalSuffix}
+                {chordInfo.originalSuffix || "M"}
               </ChordSpan>
             </React.Fragment>
           ))}
