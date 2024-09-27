@@ -47,7 +47,7 @@ const SongListContainer = styled.div`
 
 const Column = styled.div`
   flex: 1;
-  min-width: 400px;
+  min-width: 600px;
 `;
 
 const ColumnTitle = styled.h3`
@@ -64,10 +64,8 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 `;
 
 const SongPreview = styled.div`
-  margin-top: 5px;
   overflow-x: auto;
-  max-width: 300px;
-  height: 60px; // Adjust this value based on the height of your chord representation
+  height: 100px; // Adjust this value based on the height of your chord representation
 `;
 
 function App() {
