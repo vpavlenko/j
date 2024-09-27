@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import {
   getRootDifference,
@@ -251,6 +251,13 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
       currentChordIndex <= chordInfo.endIndex
     );
   };
+
+  useEffect(() => {
+    return () => {
+      // This will be called when the component unmounts
+      handleChordLeave();
+    };
+  }, [handleChordLeave]);
 
   return (
     <AlternativeChordContainer disableVerticalScroll={disableVerticalScroll}>

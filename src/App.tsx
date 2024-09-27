@@ -119,23 +119,65 @@ function App() {
     number | null
   >(null);
 
+  const stopAllPlayback = useCallback(() => {
+    Tone.Transport.stop();
+    Tone.Transport.cancel();
+    if (sampler) {
+      sampler.releaseAll();
+    }
+    setIsPlaying(false);
+    setCurrentChordIndex(null);
+    setPreviewPlayingSong(null);
+    setPreviewCurrentChordIndex(null);
+  }, [sampler]);
+
   useEffect(() => {
     const handleHashChange = () => {
       const songFromHash = window.location.hash.slice(1);
+      if (selectedSong && !songFromHash) {
+        // We're navigating away from a song to the index
+        stopAllPlayback();
+      }
       setSelectedSong(songFromHash || null);
     };
 
+    const handlePopState = () => {
+      // This will catch navigation events like swipe back
+      if (selectedSong) {
+        stopAllPlayback();
+      }
+    };
+
     window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // Set initial state based on URL
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
       window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handlePopState);
     };
-  }, []);
+  }, [stopAllPlayback, selectedSong]);
 
-  const handleSongClick = (filename: string) => {
-    window.location.hash = filename;
-  };
+  // Modify the existing useEffect for navigation
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      stopAllPlayback();
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      stopAllPlayback(); // Ensure playback stops when component unmounts
+    };
+  }, [stopAllPlayback]);
+
+  const handleSongClick = useCallback(
+    (filename: string) => {
+      stopAllPlayback();
+      window.location.hash = filename;
+    },
+    [stopAllPlayback]
+  );
 
   const selectedSongData = CORPUS.find(
     (song): song is Song => song.filename === selectedSong
