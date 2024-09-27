@@ -39,6 +39,8 @@ function App() {
     suffix: string;
   } | null>(null);
 
+  const [isHoveringChords, setIsHoveringChords] = useState(false);
+
   const handleSongClick = (filename: string) => {
     setSelectedSong(filename);
   };
@@ -416,6 +418,29 @@ function App() {
     setSongParsingErrors(errors);
   }, []);
 
+  const togglePlay = () => {
+    if (isPlaying) {
+      handleStop();
+    } else {
+      handlePlay();
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === "Space" && !isHoveringChords) {
+        event.preventDefault();
+        togglePlay();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isPlaying, isHoveringChords]);
+
   return (
     <div className="App">
       <h1>Jazz Standards Corpus</h1>
@@ -469,12 +494,19 @@ function App() {
           {selectedSongData && (
             <div>
               <h2>{selectedSongData.Title}</h2>
+              <button onClick={togglePlay}>
+                {isPlaying ? "Stop" : "Play"}
+              </button>
               <p>Composed by: {selectedSongData.ComposedBy}</p>
               <p>Key: {selectedSongData.DBKeySig}</p>
               <p>Time Signature: {selectedSongData.TimeSig.join("/")}</p>
               <p>Bars: {selectedSongData.Bars}</p>
               <h3>Chords:</h3>
-              <div className="chords">
+              <div
+                className="chords"
+                onMouseEnter={() => setIsHoveringChords(true)}
+                onMouseLeave={() => setIsHoveringChords(false)}
+              >
                 {selectedSongData.chords.map((barChords, barIndex) => (
                   <div key={barIndex} className="chord-bar">
                     {barChords.map((chord, chordIndex) => (
@@ -495,8 +527,6 @@ function App() {
                                   ? "chord highlight"
                                   : "chord"
                               }
-                              onMouseEnter={() => handleChordHover(chordName)}
-                              onMouseLeave={handleChordLeave}
                             >
                               {chordName}
                             </span>
@@ -514,16 +544,11 @@ function App() {
                   <p>Available: {hoverInfo.available ? "Yes" : "No"}</p>
                 </div>
               )}
-              {!isPlaying ? (
-                <button onClick={handlePlay}>Play</button>
-              ) : (
-                <button onClick={handleStop}>Stop</button>
-              )}
             </div>
           )}
         </div>
       )}
-      {hoverChord && (
+      {hoverChord && !isHoveringChords && (
         <div
           style={{
             position: "fixed",
