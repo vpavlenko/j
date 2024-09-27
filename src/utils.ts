@@ -21,7 +21,7 @@ export function strum(
   duration: number,
   time: number
 ) {
-  const strumDuration = 0.01; // 10ms between notes
+  const strumDuration = 0.001; // 1ms between notes
   midiNotes.forEach((midi, index) => {
     const noteTime = time + index * strumDuration;
     const note = Tone.Frequency(midi, "midi").toNote();

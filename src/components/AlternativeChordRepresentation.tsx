@@ -1,24 +1,30 @@
 import React from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
-import { getRootDifference } from "../utils"; // We'll need to create this function
+import { getRootDifference } from "../utils";
 import styled from "styled-components";
 
 // Update these styled components
 const AlternativeChordContainer = styled.div`
-  overflow-x: auto;
-  white-space: nowrap;
   width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+`;
+
+const ChordLinesWrapper = styled.div`
+  padding: 20px 0;
 `;
 
 const ChordLine = styled.div`
   white-space: nowrap;
   margin-bottom: 20px;
+  position: relative;
 `;
 
 const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
   display: inline-block;
-  width: 40px;
-  margin: 0 5px;
+  width: 30px;
+  margin: 0 2px;
   cursor: pointer;
   position: relative;
   top: ${(props) => props.top || "0"};
@@ -28,6 +34,14 @@ const ChordSpan = styled.span<{ highlight?: boolean; top?: string }>`
     background-color: yellow;
     font-weight: bold;
   `}
+`;
+
+const ChordRoot = styled.div`
+  font-weight: bold;
+`;
+
+const ChordSuffix = styled.div`
+  font-size: 0.8em;
 `;
 
 const RootDifference = styled.span`
@@ -53,6 +67,26 @@ interface Props {
   handleChordLeave: () => void;
 }
 
+const TwoLineChord: React.FC<{
+  chord: string;
+  root: string;
+  suffix: string;
+  highlight: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  top?: string;
+}> = ({ root, suffix, highlight, onMouseEnter, onMouseLeave, top }) => (
+  <ChordSpan
+    highlight={highlight}
+    onMouseEnter={onMouseEnter}
+    onMouseLeave={onMouseLeave}
+    top={top}
+  >
+    <ChordRoot>{root}</ChordRoot>
+    <ChordSuffix>{suffix}</ChordSuffix>
+  </ChordSpan>
+);
+
 const AlternativeChordRepresentation: React.FC<Props> = ({
   chords,
   currentChordIndex,
@@ -72,135 +106,111 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
 
   return (
     <AlternativeChordContainer>
-      <ChordLine>
-        {parsedChords.map((chordInfo, index) => (
-          <ChordSpan
-            key={`line-${index}`}
-            highlight={currentChordIndex === index}
-            onMouseEnter={() => handleChordHover(chordInfo.chord)}
-            onMouseLeave={handleChordLeave}
-          >
-            {chordInfo.chord}
-          </ChordSpan>
-        ))}
-      </ChordLine>
-
-      {/* Second repetition */}
-      <ChordLine style={{ marginTop: "50px" }}>
-        {parsedChords.map((chordInfo, index) => (
-          <ChordSpan
-            key={`category-second-${index}`}
-            highlight={currentChordIndex === index}
-            onMouseEnter={() => handleChordHover(chordInfo.chord)}
-            onMouseLeave={handleChordLeave}
-            top={chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"}
-          >
-            {chordInfo.chord}
-          </ChordSpan>
-        ))}
-      </ChordLine>
-
-      {/* Third repetition - with root difference numbers */}
-      <ChordLine
-        style={{
-          marginTop: "150px",
-          position: "relative",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {parsedChords.map((chordInfo, index) => (
-          <div
-            key={`category-third-${index}`}
-            style={{
-              display: "inline-block",
-              width: "40px",
-              position: "relative",
-            }}
-          >
-            <ChordSpan
-              className={
-                currentChordIndex === index ? "chord highlight" : "chord"
-              }
+      <ChordLinesWrapper>
+        {/* First repetition */}
+        <ChordLine>
+          {parsedChords.map((chordInfo, index) => (
+            <TwoLineChord
+              key={`line-1-${index}`}
+              chord={chordInfo.chord}
+              root={chordInfo.root}
+              suffix={chordInfo.suffix}
+              highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
-              style={{
-                display: "inline-block",
-                width: "00px",
-                cursor: "pointer",
-                position: "relative",
-                top: chordInfo.isMinor
-                  ? "-30px"
-                  : chordInfo.isMajor
-                  ? "30px"
-                  : "0",
-              }}
-            >
-              {chordInfo.chord}
-            </ChordSpan>
-            {index < parsedChords.length - 1 && (
-              <RootDifference>
-                {getRootDifference(
-                  chordInfo.root,
-                  parsedChords[index + 1].root
-                )}
-              </RootDifference>
-            )}
-          </div>
-        ))}
-      </ChordLine>
+            />
+          ))}
+        </ChordLine>
 
-      {/* Fourth repetition - simplified suffixes with root difference numbers */}
-      <ChordLine
-        style={{
-          marginTop: "150px",
-          position: "relative",
-          whiteSpace: "nowrap",
-        }}
-      >
-        {parsedChords.map((chordInfo, index) => (
-          <div
-            key={`category-fourth-${index}`}
-            style={{
-              display: "inline-block",
-              width: "40px",
-              position: "relative",
-            }}
-          >
-            <ChordSpan
-              className={
-                currentChordIndex === index ? "chord highlight" : "chord"
-              }
+        {/* Second repetition */}
+        <ChordLine style={{ marginTop: "50px" }}>
+          {parsedChords.map((chordInfo, index) => (
+            <TwoLineChord
+              key={`line-2-${index}`}
+              chord={chordInfo.chord}
+              root={chordInfo.root}
+              suffix={chordInfo.suffix}
+              highlight={currentChordIndex === index}
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
+              top={
+                chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+              }
+            />
+          ))}
+        </ChordLine>
+
+        {/* Third repetition - with root difference numbers */}
+        <ChordLine style={{ marginTop: "100px" }}>
+          {parsedChords.map((chordInfo, index) => (
+            <div
+              key={`line-3-${index}`}
               style={{
                 display: "inline-block",
-                width: "00px",
-                cursor: "pointer",
+                width: "30px",
                 position: "relative",
-                top: chordInfo.isMinor
-                  ? "-30px"
-                  : chordInfo.isMajor
-                  ? "30px"
-                  : "0",
               }}
             >
-              {chordInfo.isMajor
-                ? "."
-                : chordInfo.isMinor
-                ? "m"
-                : chordInfo.suffix || ""}
-            </ChordSpan>
-            {index < parsedChords.length - 1 && (
-              <RootDifference>
-                {getRootDifference(
-                  chordInfo.root,
-                  parsedChords[index + 1].root
-                )}
-              </RootDifference>
-            )}
-          </div>
-        ))}
-      </ChordLine>
+              <TwoLineChord
+                chord={chordInfo.chord}
+                root={chordInfo.root}
+                suffix={chordInfo.suffix}
+                highlight={currentChordIndex === index}
+                onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                onMouseLeave={handleChordLeave}
+                top={
+                  chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+                }
+              />
+              {index < parsedChords.length - 1 && (
+                <RootDifference>
+                  {getRootDifference(
+                    chordInfo.root,
+                    parsedChords[index + 1].root
+                  )}
+                </RootDifference>
+              )}
+            </div>
+          ))}
+        </ChordLine>
+
+        {/* Fourth repetition - simplified suffixes with root difference numbers */}
+        <ChordLine style={{ marginTop: "100px" }}>
+          {parsedChords.map((chordInfo, index) => (
+            <div
+              key={`line-4-${index}`}
+              style={{
+                display: "inline-block",
+                width: "30px",
+                position: "relative",
+              }}
+            >
+              <ChordSpan
+                highlight={currentChordIndex === index}
+                onMouseEnter={() => handleChordHover(chordInfo.chord)}
+                onMouseLeave={handleChordLeave}
+                top={
+                  chordInfo.isMinor ? "-30px" : chordInfo.isMajor ? "30px" : "0"
+                }
+              >
+                {chordInfo.isMajor
+                  ? "."
+                  : chordInfo.isMinor
+                  ? "m"
+                  : chordInfo.suffix || ""}
+              </ChordSpan>
+              {index < parsedChords.length - 1 && (
+                <RootDifference>
+                  {getRootDifference(
+                    chordInfo.root,
+                    parsedChords[index + 1].root
+                  )}
+                </RootDifference>
+              )}
+            </div>
+          ))}
+        </ChordLine>
+      </ChordLinesWrapper>
     </AlternativeChordContainer>
   );
 };
