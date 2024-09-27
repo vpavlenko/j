@@ -114,6 +114,16 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     };
   });
 
+  const renderRootDifference = (
+    currentChord: ChordInfo,
+    nextChord: ChordInfo
+  ) => {
+    const difference = getRootDifference(currentChord.root, nextChord.root);
+    const color = getRootDifferenceColor(difference);
+
+    return <RootDifference color={color}>{difference}</RootDifference>;
+  };
+
   return (
     <AlternativeChordContainer>
       <ChordLinesWrapper>
@@ -165,21 +175,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
-              {index < parsedChords.length - 1 && (
-                <RootDifference
-                  color={getRootDifferenceColor(
-                    getRootDifference(
-                      chordInfo.originalRoot,
-                      parsedChords[index + 1].originalRoot
-                    )
-                  )}
-                >
-                  {getRootDifference(
-                    chordInfo.originalRoot,
-                    parsedChords[index + 1].originalRoot
-                  )}
-                </RootDifference>
-              )}
+              {index < parsedChords.length - 1 &&
+                renderRootDifference(chordInfo, parsedChords[index + 1])}
               <TwoLineChord
                 chord={chordInfo.chord}
                 root={chordInfo.originalRoot}
@@ -210,21 +207,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 position: "relative",
               }}
             >
-              {index < parsedChords.length - 1 && (
-                <RootDifference
-                  color={getRootDifferenceColor(
-                    getRootDifference(
-                      chordInfo.originalRoot,
-                      parsedChords[index + 1].originalRoot
-                    )
-                  )}
-                >
-                  {getRootDifference(
-                    chordInfo.originalRoot,
-                    parsedChords[index + 1].originalRoot
-                  )}
-                </RootDifference>
-              )}
+              {index < parsedChords.length - 1 &&
+                renderRootDifference(chordInfo, parsedChords[index + 1])}
               <ChordSpan
                 highlight={currentChordIndex === index}
                 onMouseEnter={() => handleChordHover(chordInfo.chord)}

@@ -59,11 +59,7 @@ function App() {
     [key: string]: string[];
   }>({});
 
-  const [hoverChord, setHoverChord] = useState<{
-    chord: string;
-    root: string;
-    suffix: string;
-  } | null>(null);
+  const [hoverChord, setHoverChord] = useState<ParsedChord | null>(null);
 
   const [isHoveringChords, setIsHoveringChords] = useState(false);
 
@@ -265,7 +261,7 @@ function App() {
     }
 
     setHoverInfo({ root, suffix, available });
-    setHoverChord({ chord: chordName, root, suffix });
+    setHoverChord(parsedChord);
   }, []);
 
   const handleChordLeave = useCallback(() => {
@@ -464,9 +460,13 @@ function App() {
           }}
         >
           <h4>Chord Details</h4>
-          <p>Chord: {hoverChord.chord}</p>
           <p>Root: {hoverChord.root}</p>
+          <p>Original Root: {hoverChord.originalRoot}</p>
           <p>Suffix: {hoverChord.suffix}</p>
+          <p>Original Suffix: {hoverChord.originalSuffix}</p>
+          <p>Is Major: {hoverChord.isMajor ? "Yes" : "No"}</p>
+          <p>Is Minor: {hoverChord.isMinor ? "Yes" : "No"}</p>
+          {hoverChord.error && <p>Error: {hoverChord.error}</p>}
         </div>
       )}
     </div>

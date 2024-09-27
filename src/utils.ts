@@ -15,6 +15,29 @@ const noteOrder = [
   "B",
 ];
 
+const flatToSharp: { [key: string]: string } = {
+  Db: "C#",
+  Eb: "D#",
+  Gb: "F#",
+  Ab: "G#",
+  Bb: "A#",
+};
+
+const rootToNumber: { [key: string]: number } = {
+  C: 0,
+  "C#": 1,
+  D: 2,
+  "D#": 3,
+  E: 4,
+  F: 5,
+  "F#": 6,
+  G: 7,
+  "G#": 8,
+  A: 9,
+  "A#": 10,
+  B: 11,
+};
+
 export function strum(
   sampler: Tone.Sampler,
   midiNotes: number[],
@@ -27,6 +50,33 @@ export function strum(
     const note = Tone.Frequency(midi, "midi").toNote();
     sampler.triggerAttackRelease(note, duration, noteTime);
   });
+}
+
+export function getRootDifference(root1: string, root2: string): number {
+  console.log(`Calculating root difference: ${root1} to ${root2}`);
+
+  const num1 = rootToNumber[root1];
+  const num2 = rootToNumber[root2];
+
+  console.log(`Root numbers: ${num1}, ${num2}`);
+
+  if (num1 === undefined || num2 === undefined) {
+    console.warn(`Invalid root: ${num1 === undefined ? root1 : root2}`);
+    return 0;
+  }
+
+  let difference = num2 - num1;
+
+  // Ensure the difference is in the range -5 to 6
+  if (difference > 6) {
+    difference -= 12;
+  } else if (difference < -5) {
+    difference += 12;
+  }
+
+  console.log(`Calculated difference: ${difference}`);
+
+  return difference;
 }
 
 export function getRootDifferenceColor(difference: number): string {
@@ -46,21 +96,4 @@ export function getRootDifferenceColor(difference: number): string {
   };
 
   return colorMap[difference] || "black";
-}
-
-export function getRootDifference(root1: string, root2: string): number {
-  const index1 = noteOrder.indexOf(root1);
-  const index2 = noteOrder.indexOf(root2);
-
-  if (index1 === -1 || index2 === -1) {
-    return 0; // Return 0 if either root is not found
-  }
-
-  let difference = index2 - index1;
-  if (difference < 0) {
-    difference += 12; // Ensure positive difference
-  }
-
-  // Map the result from 0..11 to -5..+6
-  return difference <= 6 ? difference : difference - 12;
 }
