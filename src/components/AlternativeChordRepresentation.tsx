@@ -1,6 +1,10 @@
 import React from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
-import { getRootDifference, getRootDifferenceColor } from "../utils";
+import {
+  getRootDifference,
+  getRootDifferenceColor,
+  getContrastColor,
+} from "../utils";
 import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
@@ -60,15 +64,21 @@ const ChordSuffix = styled.div`
   font-weight: bold;
 `;
 
-const RootDifference = styled.span<{ color: string; left: number }>`
+const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
   position: absolute;
   left: ${(props) => props.left}px;
-  top: -20px;
+  top: 0px;
   width: ${GAP_WIDTH}px;
+  height: ${GAP_WIDTH}px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   font-size: 1.2em;
-  color: ${(props) => props.color};
+  background-color: ${(props) => props.backgroundColor};
+  color: ${(props) => getContrastColor(props.backgroundColor)};
   font-weight: bold;
+  border-radius: 50%;
 `;
 
 interface ChordInfo {
@@ -166,13 +176,13 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     left: number
   ) => {
     const difference = getRootDifference(currentChord.root, nextChord.root);
-    const color =
+    const backgroundColor =
       difference === "?"
         ? "gray"
         : getRootDifferenceColor(parseInt(difference, 10));
 
     return (
-      <RootDifference color={color} left={left}>
+      <RootDifference backgroundColor={backgroundColor} left={left}>
         {difference}
       </RootDifference>
     );
@@ -230,12 +240,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
         <ChordLine>
           {squashedChords.map((chordInfo, index) => (
             <React.Fragment key={`line-3-${index}`}>
-              {index < squashedChords.length - 1 &&
-                renderRootDifference(
-                  chordInfo,
-                  squashedChords[index + 1],
-                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
-                )}
               <TwoLineChord
                 chord={chordInfo.chord}
                 root={chordInfo.originalRoot}
@@ -257,6 +261,12 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                     : "0"
                 }
               />
+              {index < squashedChords.length - 1 &&
+                renderRootDifference(
+                  chordInfo,
+                  squashedChords[index + 1],
+                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
+                )}
             </React.Fragment>
           ))}
         </ChordLine>
@@ -265,12 +275,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
         <ChordLine>
           {squashedChords.map((chordInfo, index) => (
             <React.Fragment key={`line-4-${index}`}>
-              {index < squashedChords.length - 1 &&
-                renderRootDifference(
-                  chordInfo,
-                  squashedChords[index + 1],
-                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
-                )}
               <ChordSpan
                 highlight={
                   currentChordIndex !== null &&
@@ -291,6 +295,12 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
               >
                 {chordInfo.originalSuffix || "M"}
               </ChordSpan>
+              {index < squashedChords.length - 1 &&
+                renderRootDifference(
+                  chordInfo,
+                  squashedChords[index + 1],
+                  index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH
+                )}
             </React.Fragment>
           ))}
         </ChordLine>
