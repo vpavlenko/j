@@ -11,6 +11,7 @@ import {
   checkChordAvailability,
   ParsedChord,
 } from "./helpers/chordParser";
+import AlternativeChordRepresentation from "./components/AlternativeChordRepresentation";
 
 interface ChordEvent {
   chord: string;
@@ -420,21 +421,12 @@ function App() {
           </div>
           <div style={{ flex: 1, marginLeft: "20px" }}>
             <h3>Alternative Chord Representation:</h3>
-            <div className="flattened-chords">
-              {flattenedChords.map((chord, index) => (
-                <span
-                  key={index}
-                  className={
-                    currentChordIndex === index ? "chord highlight" : "chord"
-                  }
-                  onMouseEnter={() => handleChordHover(chord)}
-                  onMouseLeave={handleChordLeave}
-                  style={{ margin: "0 5px", cursor: "pointer" }}
-                >
-                  {chord}
-                </span>
-              ))}
-            </div>
+            <AlternativeChordRepresentation
+              chords={flattenedChords}
+              currentChordIndex={currentChordIndex}
+              handleChordHover={handleChordHover}
+              handleChordLeave={handleChordLeave}
+            />
           </div>
         </div>
       )}

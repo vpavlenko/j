@@ -28,3 +28,62 @@
 .chord-info p {
   margin: 5px 0;
 }
+
+.grouped-chords {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chord-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.minor-chords {
+  color: #6a0dad;
+}
+
+.major-chords {
+  color: #1e90ff;
+}
+
+.other-chords {
+  color: #ff4500;
+}
+
+.alternative-chord-representation {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.chord-line {
+  margin-bottom: 10px;
+}
+
+.chord-categories {
+  display: flex;
+  flex-direction: column;
+}
+
+.minor-chords,
+.dominant-chords,
+.major-chords {
+  height: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.minor-chords {
+  justify-content: flex-start;
+}
+
+.dominant-chords {
+  justify-content: center;
+}
+
+.major-chords {
+  justify-content: flex-end;
+}
