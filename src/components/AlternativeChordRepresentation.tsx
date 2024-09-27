@@ -41,6 +41,7 @@ const ChordSpan = styled.span<{
   left: ${(props) => props.left}px;
   top: ${(props) => props.top || "0"};
   cursor: pointer;
+  line-height: 0.9;
   ${(props) =>
     props.highlight &&
     `
