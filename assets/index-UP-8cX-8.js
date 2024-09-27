@@ -316,7 +316,7 @@ Error generating stack: `+i.message+`
   gap: 20px;
 `,WC=se.div`
   flex: 1;
-  min-width: 200px;
+  min-width: 400px;
 `,RC=se.h3`
   margin-bottom: 10px;
 `,OC=se.a`
