@@ -8,9 +8,9 @@ import {
 import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
-const CHORD_WIDTH = 40;
-const GAP_WIDTH = 20;
-const CHORD_VERTICAL_OFFSET = 10;
+const CHORD_WIDTH = 30;
+const GAP_WIDTH = 15;
+const CHORD_VERTICAL_OFFSET = 20;
 
 // Update these styled components
 const AlternativeChordContainer = styled.div`

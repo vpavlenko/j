@@ -161,7 +161,10 @@ const minorChordSuffixes = new Set([
 ]);
 
 function isMinorChord(suffix: string): boolean {
-  return minorChordSuffixes.has(suffix);
+  return (
+    minorChordSuffixes.has(suffix) ||
+    minorChordSuffixes.has(suffix.split("/")?.[0])
+  );
 }
 
 const majorChordSuffixes = new Set([
