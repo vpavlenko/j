@@ -113,8 +113,9 @@ interface Props {
   handleChordHover: (chord: string) => void;
   handleChordLeave: () => void;
   playChord: (chord: string) => void;
-  showOnlyLastRep?: boolean; // Add this new prop
-  disableVerticalScroll?: boolean; // Add this new prop
+  showOnlyLastRep?: boolean;
+  disableVerticalScroll?: boolean;
+  directIndex?: number | null;
 }
 
 const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
@@ -176,8 +177,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   handleChordHover,
   handleChordLeave,
   playChord,
-  showOnlyLastRep = false, // Add this new prop with a default value
-  disableVerticalScroll = false, // Add this new prop with a default value
+  showOnlyLastRep = false,
+  disableVerticalScroll = false,
+  directIndex,
 }) => {
   const parsedChords: ChordInfo[] = chords.map((chord) => {
     const parsedChord: ParsedChord = parseChordName(chord);
@@ -236,6 +238,20 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     );
   };
 
+  const shouldHighlightChord = (
+    chordInfo: SquashedChordInfo,
+    index: number
+  ) => {
+    if (showOnlyLastRep && directIndex !== undefined && directIndex !== null) {
+      return index === directIndex;
+    }
+    return (
+      currentChordIndex !== null &&
+      currentChordIndex >= chordInfo.startIndex &&
+      currentChordIndex <= chordInfo.endIndex
+    );
+  };
+
   return (
     <AlternativeChordContainer disableVerticalScroll={disableVerticalScroll}>
       <ChordLinesWrapper>
@@ -245,11 +261,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             {squashedChords.map((chordInfo, index) => (
               <React.Fragment key={`last-rep-${index}`}>
                 <ChordSpan
-                  highlight={
-                    currentChordIndex !== null &&
-                    currentChordIndex >= chordInfo.startIndex &&
-                    currentChordIndex <= chordInfo.endIndex
-                  }
+                  highlight={shouldHighlightChord(chordInfo, index)}
                   onMouseEnter={() => handleChordHover(chordInfo.chord)}
                   onMouseLeave={handleChordLeave}
                   onClick={() => playChord(chordInfo.chord)}

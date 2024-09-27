@@ -545,7 +545,8 @@ function App() {
                             chords={song.chords
                               .flat()
                               .flatMap((chord) => chord.split(" "))}
-                            currentChordIndex={
+                            currentChordIndex={null}
+                            directIndex={
                               previewPlayingSong === song.filename
                                 ? previewCurrentChordIndex
                                 : null
