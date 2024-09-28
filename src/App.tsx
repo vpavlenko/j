@@ -14,6 +14,7 @@ import {
 import AlternativeChordRepresentation, {
   ChordLine,
   SquashedChordInfo,
+  calculateVerticalOffset,
 } from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
@@ -69,7 +70,6 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 
 const SongPreview = styled.div`
   overflow-x: auto;
-  height: 80px;
 `;
 
 const SongItem = styled.li`
@@ -648,6 +648,9 @@ function App() {
                                 ? previewCurrentChordIndex
                                 : null
                             }
+                            verticalOffset={calculateVerticalOffset(
+                              getUniqueChords(song.chords)
+                            )}
                           />
                         )}
                       </SongPreview>

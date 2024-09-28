@@ -20,6 +20,21 @@ const CHORD_LEVEL = {
   MAJOR: 2 * CHORD_VERTICAL_OFFSET,
 };
 
+// Move this function here
+export const calculateVerticalOffset = (
+  chords: SquashedChordInfo[]
+): number => {
+  const hasMinor = chords.some((chord) => chord.isMinor);
+  const hasNeutral = chords.some((chord) => !chord.isMinor && !chord.isMajor);
+
+  if (!hasMinor && !hasNeutral) {
+    return 2 * CHORD_VERTICAL_OFFSET;
+  } else if (!hasMinor) {
+    return CHORD_VERTICAL_OFFSET;
+  }
+  return 0;
+};
+
 // Update these styled components
 const AlternativeChordContainer = styled.div<{
   disableVerticalScroll?: boolean;
@@ -119,6 +134,8 @@ interface Props {
   showOnlyLastRep?: boolean;
   disableVerticalScroll?: boolean;
   directIndex?: number | null;
+  // Add this line
+  verticalOffset?: number;
 }
 
 const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
@@ -194,6 +211,7 @@ export const ChordLine: React.FC<{
   playChord: (chord: string) => void;
   showOnlyLastRep?: boolean;
   directIndex?: number | null;
+  verticalOffset: number;
 }> = ({
   repLevel,
   chords,
@@ -203,6 +221,7 @@ export const ChordLine: React.FC<{
   playChord,
   showOnlyLastRep,
   directIndex,
+  verticalOffset,
 }) => {
   const renderChord = (chordInfo: SquashedChordInfo, index: number) => {
     const shouldHighlight = showOnlyLastRep
@@ -211,7 +230,7 @@ export const ChordLine: React.FC<{
         currentChordIndex >= chordInfo.startIndex &&
         currentChordIndex <= chordInfo.endIndex;
 
-    const chordLevel = getChordLevel(chordInfo);
+    const chordLevel = getChordLevel(chordInfo, verticalOffset);
 
     switch (repLevel) {
       case 1:
@@ -229,20 +248,6 @@ export const ChordLine: React.FC<{
           />
         );
       case 2:
-        return (
-          <TwoLineChord
-            key={`rep-${repLevel}-${index}`}
-            chord={chordInfo.chord}
-            root={chordInfo.originalRoot}
-            suffix={chordInfo.originalSuffix}
-            highlight={shouldHighlight}
-            onMouseEnter={() => handleChordHover(chordInfo.chord)}
-            onMouseLeave={handleChordLeave}
-            onClick={() => playChord(chordInfo.chord)}
-            left={index * (CHORD_WIDTH + GAP_WIDTH)}
-            top={`${chordLevel}px`}
-          />
-        );
       case 3:
       case 4:
         return (
@@ -276,7 +281,8 @@ export const ChordLine: React.FC<{
               chordInfo,
               index < chords.length - 1 ? chords[index + 1] : chords[0],
               index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH,
-              chordLevel
+              chordLevel,
+              verticalOffset
             )}
           </React.Fragment>
         );
@@ -288,20 +294,24 @@ export const ChordLine: React.FC<{
   return <ChordLineWrapper>{chords.map(renderChord)}</ChordLineWrapper>;
 };
 
-const getChordLevel = (chord: SquashedChordInfo): number => {
-  if (chord.isMinor) return CHORD_LEVEL.MINOR;
-  if (chord.isMajor) return CHORD_LEVEL.MAJOR;
-  return CHORD_LEVEL.NEUTRAL;
+const getChordLevel = (
+  chord: SquashedChordInfo,
+  verticalOffset: number
+): number => {
+  if (chord.isMinor) return CHORD_LEVEL.MINOR - verticalOffset;
+  if (chord.isMajor) return CHORD_LEVEL.MAJOR - verticalOffset;
+  return CHORD_LEVEL.NEUTRAL - verticalOffset;
 };
 
 const renderRootDifference = (
   currentChord: SquashedChordInfo,
   nextChord: SquashedChordInfo,
   left: number,
-  chordLevel: number
+  chordLevel: number,
+  verticalOffset: number
 ) => {
   const difference = getRootDifference(currentChord.root, nextChord.root);
-  const nextLevel = getChordLevel(nextChord);
+  const nextLevel = getChordLevel(nextChord, verticalOffset);
   const averageLevel = (chordLevel + nextLevel) / 2;
 
   if (difference === "0") {
@@ -378,6 +388,8 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     []
   );
 
+  const verticalOffset = calculateVerticalOffset(squashedChords);
+
   useEffect(() => {
     return () => {
       handleChordLeave();
@@ -397,6 +409,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             playChord={playChord}
             showOnlyLastRep={showOnlyLastRep}
             directIndex={directIndex}
+            verticalOffset={verticalOffset}
           />
         ) : (
           <>
@@ -412,6 +425,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordHover={handleChordHover}
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
+                verticalOffset={verticalOffset}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -422,6 +436,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordHover={handleChordHover}
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
+                verticalOffset={verticalOffset}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -432,6 +447,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordHover={handleChordHover}
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
+                verticalOffset={verticalOffset}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -442,6 +458,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordHover={handleChordHover}
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
+                verticalOffset={verticalOffset}
               />
             </div>
           </>
