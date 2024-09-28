@@ -145,6 +145,9 @@ function App() {
   const [hoveredSongs, setHoveredSongs] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [previewedSongs, setPreviewedSongs] = useState<{
+    [key: string]: boolean;
+  }>({});
 
   const [previewPlayingSong, setPreviewPlayingSong] = useState<string | null>(
     null
@@ -529,6 +532,11 @@ function App() {
 
   const handleMouseEnter = useCallback((filename: string) => {
     setHoveredSongs((prev) => ({ ...prev, [filename]: true }));
+    setPreviewedSongs((prev) => ({ ...prev, [filename]: true }));
+  }, []);
+
+  const handleMouseLeave = useCallback((filename: string) => {
+    setHoveredSongs((prev) => ({ ...prev, [filename]: false }));
   }, []);
 
   const playPreview = useCallback(
@@ -644,12 +652,7 @@ function App() {
                     <SongItem
                       key={song.filename}
                       onMouseEnter={() => handleMouseEnter(song.filename)}
-                      onMouseLeave={() =>
-                        setHoveredSongs((prev) => ({
-                          ...prev,
-                          [song.filename]: false,
-                        }))
-                      }
+                      onMouseLeave={() => handleMouseLeave(song.filename)}
                     >
                       <SongLink
                         href={`#${song.filename}`}
@@ -665,7 +668,8 @@ function App() {
                       <SongPreview>
                         {(hoveredSongs[song.filename] ||
                           previewPlayingSong === song.filename ||
-                          autoPreviewSongs.includes(song.filename)) && (
+                          autoPreviewSongs.includes(song.filename) ||
+                          previewedSongs[song.filename]) && (
                           <ChordLine
                             repLevel={4}
                             chords={getSquashedChords(song.chords)}
