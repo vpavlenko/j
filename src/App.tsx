@@ -15,6 +15,7 @@ import AlternativeChordRepresentation, {
   ChordLine,
   SquashedChordInfo,
   calculateVerticalOffset,
+  ChordInfo,
 } from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
@@ -81,6 +82,35 @@ const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
   cursor: pointer;
   color: ${(props) => (props.isPlaying ? "#4CAF50" : "inherit")};
 `;
+
+const getSquashedChords = (chords: string[][]): SquashedChordInfo[] => {
+  const flatChords = chords.flat().flatMap((chord) => chord.split(" "));
+
+  const parsedChords: ChordInfo[] = flatChords.map((chord) => {
+    const parsedChord: ParsedChord = parseChordName(chord);
+    return {
+      chord,
+      root: parsedChord.root,
+      originalRoot: parsedChord.originalRoot,
+      suffix: parsedChord.suffix,
+      originalSuffix: parsedChord.originalSuffix,
+      isMajor: parsedChord.isMajor,
+      isMinor: parsedChord.isMinor,
+    };
+  });
+
+  return parsedChords.reduce(
+    (acc: SquashedChordInfo[], curr: ChordInfo, index: number) => {
+      if (index === 0 || curr.chord !== parsedChords[index - 1].chord) {
+        acc.push({ ...curr, startIndex: index, endIndex: index });
+      } else {
+        acc[acc.length - 1].endIndex = index;
+      }
+      return acc;
+    },
+    []
+  );
+};
 
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
@@ -637,7 +667,7 @@ function App() {
                           autoPreviewSongs.includes(song.filename)) && (
                           <ChordLine
                             repLevel={4}
-                            chords={getUniqueChords(song.chords)}
+                            chords={getSquashedChords(song.chords)}
                             currentChordIndex={null}
                             handleChordHover={() => {}}
                             handleChordLeave={() => {}}
@@ -649,7 +679,7 @@ function App() {
                                 : null
                             }
                             verticalOffset={calculateVerticalOffset(
-                              getUniqueChords(song.chords)
+                              getSquashedChords(song.chords)
                             )}
                           />
                         )}
@@ -849,27 +879,5 @@ function getLinearIndex(
   }
   return linearIndex + chordNameIndex;
 }
-
-// Modify the getUniqueChords function to return SquashedChordInfo[]
-const getUniqueChords = (chords: string[][]): SquashedChordInfo[] => {
-  const flatChords = chords.flat().flatMap((chord) => chord.split(" "));
-  const uniqueChords = flatChords.filter(
-    (chord, index, self) => index === self.findIndex((t) => t === chord)
-  );
-  return uniqueChords.map((chord, index) => {
-    const parsedChord = parseChordName(chord);
-    return {
-      chord,
-      root: parsedChord.root,
-      originalRoot: parsedChord.originalRoot,
-      suffix: parsedChord.suffix,
-      originalSuffix: parsedChord.originalSuffix,
-      isMajor: parsedChord.isMajor,
-      isMinor: parsedChord.isMinor,
-      startIndex: index,
-      endIndex: index,
-    };
-  });
-};
 
 export default App;
