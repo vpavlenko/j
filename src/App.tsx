@@ -11,7 +11,10 @@ import {
   checkChordAvailability,
   ParsedChord,
 } from "./helpers/chordParser";
-import AlternativeChordRepresentation from "./components/AlternativeChordRepresentation";
+import AlternativeChordRepresentation, {
+  ChordLine,
+  SquashedChordInfo,
+} from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
 import { FaVolumeUp } from "react-icons/fa";
@@ -66,7 +69,7 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 
 const SongPreview = styled.div`
   overflow-x: auto;
-  height: 100px; // Adjust this value based on the height of your chord representation
+  height: 100px;
 `;
 
 const SongItem = styled.li`
@@ -632,22 +635,19 @@ function App() {
                         {(hoveredSongs[song.filename] ||
                           previewPlayingSong === song.filename ||
                           autoPreviewSongs.includes(song.filename)) && (
-                          <AlternativeChordRepresentation
-                            key={`${song.filename}`}
-                            chords={song.chords
-                              .flat()
-                              .flatMap((chord) => chord.split(" "))}
+                          <ChordLine
+                            repLevel={4}
+                            chords={getUniqueChords(song.chords)}
                             currentChordIndex={null}
+                            handleChordHover={() => {}}
+                            handleChordLeave={() => {}}
+                            playChord={() => {}}
+                            showOnlyLastRep={true}
                             directIndex={
                               previewPlayingSong === song.filename
                                 ? previewCurrentChordIndex
                                 : null
                             }
-                            handleChordHover={() => {}}
-                            handleChordLeave={() => {}}
-                            playChord={() => {}}
-                            showOnlyLastRep={true}
-                            disableVerticalScroll={true}
                           />
                         )}
                       </SongPreview>
@@ -846,5 +846,27 @@ function getLinearIndex(
   }
   return linearIndex + chordNameIndex;
 }
+
+// Modify the getUniqueChords function to return SquashedChordInfo[]
+const getUniqueChords = (chords: string[][]): SquashedChordInfo[] => {
+  const flatChords = chords.flat().flatMap((chord) => chord.split(" "));
+  const uniqueChords = flatChords.filter(
+    (chord, index, self) => index === self.findIndex((t) => t === chord)
+  );
+  return uniqueChords.map((chord, index) => {
+    const parsedChord = parseChordName(chord);
+    return {
+      chord,
+      root: parsedChord.root,
+      originalRoot: parsedChord.originalRoot,
+      suffix: parsedChord.suffix,
+      originalSuffix: parsedChord.originalSuffix,
+      isMajor: parsedChord.isMajor,
+      isMinor: parsedChord.isMinor,
+      startIndex: index,
+      endIndex: index,
+    };
+  });
+};
 
 export default App;

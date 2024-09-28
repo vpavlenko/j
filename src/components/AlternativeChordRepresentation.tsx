@@ -93,7 +93,7 @@ const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
   border-radius: 50%;
 `;
 
-interface ChordInfo {
+export interface ChordInfo {
   chord: string;
   root: string;
   originalRoot: string;
@@ -103,7 +103,7 @@ interface ChordInfo {
   isMinor: boolean;
 }
 
-interface SquashedChordInfo extends ChordInfo {
+export interface SquashedChordInfo extends ChordInfo {
   startIndex: number;
   endIndex: number;
 }
@@ -172,8 +172,7 @@ const TwoLineChord: React.FC<{
   </ChordSpan>
 );
 
-// Update the ChordLine functional component
-const ChordLine: React.FC<{
+export const ChordLine: React.FC<{
   repLevel: number;
   chords: SquashedChordInfo[];
   currentChordIndex: number | null;
