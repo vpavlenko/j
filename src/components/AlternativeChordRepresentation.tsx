@@ -276,8 +276,7 @@ export const ChordLine: React.FC<{
               chordInfo,
               index < chords.length - 1 ? chords[index + 1] : chords[0],
               index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH,
-              chordLevel,
-              index === chords.length - 1
+              chordLevel
             )}
           </React.Fragment>
         );
@@ -299,17 +298,37 @@ const renderRootDifference = (
   currentChord: SquashedChordInfo,
   nextChord: SquashedChordInfo,
   left: number,
-  chordLevel: number,
-  isLastChord: boolean = false
+  chordLevel: number
 ) => {
   const difference = getRootDifference(currentChord.root, nextChord.root);
+  const nextLevel = getChordLevel(nextChord);
+  const averageLevel = (chordLevel + nextLevel) / 2;
+
+  if (difference === "0") {
+    return (
+      <span
+        style={{
+          position: "absolute",
+          left: `${left}px`,
+          top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
+          width: `${GAP_WIDTH}px`,
+          height: `${GAP_WIDTH}px`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "0.8em",
+          fontWeight: "bold",
+        }}
+      >
+        =
+      </span>
+    );
+  }
+
   const backgroundColor =
     difference === "?"
       ? "gray"
       : getRootDifferenceColor(parseInt(difference, 10));
-
-  const nextLevel = getChordLevel(nextChord);
-  const averageLevel = (chordLevel + nextLevel) / 2;
 
   return (
     <RootDifference
