@@ -69,7 +69,7 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 
 const SongPreview = styled.div`
   overflow-x: auto;
-  height: 100px;
+  height: 80px;
 `;
 
 const SongItem = styled.li`

@@ -11,6 +11,7 @@ import styled from "styled-components";
 const CHORD_WIDTH = 12;
 const GAP_WIDTH = 12;
 const CHORD_VERTICAL_OFFSET = 15;
+const ROOT_DIFFERENCE_OFFSET = -1;
 
 // Add this new constant
 const CHORD_LEVEL = {
@@ -37,7 +38,8 @@ const ChordLinesWrapper = styled.div`
 const ChordLineWrapper = styled.div`
   position: relative;
   height: 40px;
-  margin-bottom: 60px;
+  margin-bottom: 10px;
+  margin-top: 5px;
 `;
 
 const ChordSpan = styled.span<{
@@ -48,7 +50,7 @@ const ChordSpan = styled.span<{
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: ${CHORD_WIDTH}px;
   height: 30px;
   position: absolute;
@@ -127,9 +129,20 @@ const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
     const prefix = match[0];
     const postfix = suffix.slice(prefix.length);
     return (
-      <span style={{ whiteSpace: "nowrap" }}>
-        {prefix}
-        <sup>{postfix}</sup>
+      <span
+        style={{
+          whiteSpace: "nowrap",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "flex-start",
+          height: "100%",
+        }}
+      >
+        <span style={{ lineHeight: "1" }}>{prefix}</span>
+        <span style={{ fontSize: "0.7em", color: "gray", lineHeight: "1" }}>
+          {postfix}
+        </span>
       </span>
     );
   }
@@ -301,7 +314,7 @@ const renderRootDifference = (
     <RootDifference
       backgroundColor={backgroundColor}
       left={left}
-      style={{ top: `${averageLevel + 11}px` }}
+      style={{ top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px` }}
     >
       {difference}
     </RootDifference>
@@ -365,42 +378,50 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
           />
         ) : (
           <>
-            <ChordLine
-              repLevel={1}
-              chords={parsedChords.map((chord, index) => ({
-                ...chord,
-                startIndex: index,
-                endIndex: index,
-              }))}
-              currentChordIndex={currentChordIndex}
-              handleChordHover={handleChordHover}
-              handleChordLeave={handleChordLeave}
-              playChord={playChord}
-            />
-            <ChordLine
-              repLevel={2}
-              chords={squashedChords}
-              currentChordIndex={currentChordIndex}
-              handleChordHover={handleChordHover}
-              handleChordLeave={handleChordLeave}
-              playChord={playChord}
-            />
-            <ChordLine
-              repLevel={3}
-              chords={squashedChords}
-              currentChordIndex={currentChordIndex}
-              handleChordHover={handleChordHover}
-              handleChordLeave={handleChordLeave}
-              playChord={playChord}
-            />
-            <ChordLine
-              repLevel={4}
-              chords={squashedChords}
-              currentChordIndex={currentChordIndex}
-              handleChordHover={handleChordHover}
-              handleChordLeave={handleChordLeave}
-              playChord={playChord}
-            />
+            <div style={{ marginBottom: "60px" }}>
+              <ChordLine
+                repLevel={1}
+                chords={parsedChords.map((chord, index) => ({
+                  ...chord,
+                  startIndex: index,
+                  endIndex: index,
+                }))}
+                currentChordIndex={currentChordIndex}
+                handleChordHover={handleChordHover}
+                handleChordLeave={handleChordLeave}
+                playChord={playChord}
+              />
+            </div>
+            <div style={{ marginBottom: "60px" }}>
+              <ChordLine
+                repLevel={2}
+                chords={squashedChords}
+                currentChordIndex={currentChordIndex}
+                handleChordHover={handleChordHover}
+                handleChordLeave={handleChordLeave}
+                playChord={playChord}
+              />
+            </div>
+            <div style={{ marginBottom: "60px" }}>
+              <ChordLine
+                repLevel={3}
+                chords={squashedChords}
+                currentChordIndex={currentChordIndex}
+                handleChordHover={handleChordHover}
+                handleChordLeave={handleChordLeave}
+                playChord={playChord}
+              />
+            </div>
+            <div style={{ marginBottom: "60px" }}>
+              <ChordLine
+                repLevel={4}
+                chords={squashedChords}
+                currentChordIndex={currentChordIndex}
+                handleChordHover={handleChordHover}
+                handleChordLeave={handleChordLeave}
+                playChord={playChord}
+              />
+            </div>
           </>
         )}
       </ChordLinesWrapper>
