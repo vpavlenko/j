@@ -52,9 +52,9 @@ const ChordLinesWrapper = styled.div`
 // Rename the styled ChordLine component to ChordLineWrapper
 const ChordLineWrapper = styled.div`
   position: relative;
-  height: 40px;
-  margin-bottom: 10px;
-  margin-top: 5px;
+  height: 50px;
+  margin-bottom: 20px;
+  margin-top: 10px;
 `;
 
 const ChordSpan = styled.span<{
