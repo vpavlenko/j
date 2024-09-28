@@ -14,9 +14,9 @@ const CHORD_VERTICAL_OFFSET = 15;
 
 // Add this new constant
 const CHORD_LEVEL = {
-  MINOR: -CHORD_VERTICAL_OFFSET,
-  NEUTRAL: 0,
-  MAJOR: CHORD_VERTICAL_OFFSET,
+  MINOR: 0,
+  NEUTRAL: CHORD_VERTICAL_OFFSET,
+  MAJOR: 2 * CHORD_VERTICAL_OFFSET,
 };
 
 // Update these styled components
