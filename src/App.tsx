@@ -70,7 +70,8 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 `;
 
 const SongPreview = styled.div`
-  overflow-x: auto;
+  overflow-x: scroll;
+  overflow-y: auto;
 `;
 
 const SongItem = styled.li`

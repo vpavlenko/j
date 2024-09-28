@@ -247,7 +247,6 @@ export const ChordLine: React.FC<{
             left={index * (CHORD_WIDTH + GAP_WIDTH)}
           />
         );
-      case 2:
       case 3:
       case 4:
         return (
@@ -421,17 +420,6 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                   startIndex: index,
                   endIndex: index,
                 }))}
-                currentChordIndex={currentChordIndex}
-                handleChordHover={handleChordHover}
-                handleChordLeave={handleChordLeave}
-                playChord={playChord}
-                verticalOffset={verticalOffset}
-              />
-            </div>
-            <div style={{ marginBottom: "60px" }}>
-              <ChordLine
-                repLevel={2}
-                chords={squashedChords}
                 currentChordIndex={currentChordIndex}
                 handleChordHover={handleChordHover}
                 handleChordLeave={handleChordLeave}
