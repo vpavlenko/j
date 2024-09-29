@@ -133,32 +133,42 @@ interface Props {
 }
 
 const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
-  const prefixRegex = /^(maj|7|M|m|o|9|11|13)/;
-  const match = suffix.match(prefixRegex);
+  let prefix = "M";
+  let postfix = "";
 
-  if (match) {
-    const prefix = match[0];
-    const postfix = suffix.slice(prefix.length);
-    return (
-      <span
-        style={{
-          whiteSpace: "nowrap",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          height: "100%",
-        }}
-      >
-        <span style={{ lineHeight: "1" }}>{prefix}</span>
+  if (suffix.startsWith("/")) {
+    postfix = suffix;
+  } else {
+    const prefixRegex = /^(maj|7|M|m|o|9|11|13)/;
+    const match = suffix.match(prefixRegex);
+
+    if (match) {
+      prefix = match[0];
+      postfix = suffix.slice(prefix.length);
+    } else {
+      postfix = suffix;
+    }
+  }
+
+  return (
+    <span
+      style={{
+        whiteSpace: "nowrap",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        height: "100%",
+      }}
+    >
+      <span style={{ lineHeight: "1" }}>{prefix}</span>
+      {postfix && (
         <span style={{ fontSize: "0.7em", color: "gray", lineHeight: "1" }}>
           {postfix}
         </span>
-      </span>
-    );
-  }
-
-  return <>{suffix}</>;
+      )}
+    </span>
+  );
 };
 
 const TwoLineChord: React.FC<{

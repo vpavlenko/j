@@ -185,7 +185,7 @@ const majorChordSuffixes = new Set([
 ]);
 
 function isMajorChord(suffix: string): boolean {
-  return majorChordSuffixes.has(suffix);
+  return majorChordSuffixes.has(suffix) || suffix.startsWith("/");
 }
 
 // Export these functions if needed elsewhere

@@ -554,7 +554,7 @@ function App() {
       Tone.Transport.bpm.value = bpm;
       Tone.Transport.timeSignature = song.TimeSig;
 
-      const secondsPerBeat = 20 / bpm;
+      const secondsPerBeat = 40 / bpm;
       const secondsPerBar = secondsPerBeat * song.TimeSig[0];
 
       const lastRepChords = song.chords
