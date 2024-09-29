@@ -22,6 +22,7 @@ import AlternativeChordRepresentation, {
 import styled from "styled-components";
 import { Sampler } from "tone";
 import { FaVolumeUp } from "react-icons/fa";
+import { useInView } from "react-intersection-observer";
 
 interface ChordEvent {
   chord: string;
@@ -175,6 +176,18 @@ function App() {
   >(null);
 
   const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
+
+  const [visibleSongs, setVisibleSongs] = useState<number>(100);
+
+  const { ref: loadMoreRef, inView } = useInView({
+    threshold: 0,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      setVisibleSongs((prevVisible) => prevVisible + 100);
+    }
+  }, [inView]);
 
   useEffect(() => {
     // Function to get songs from the first six distinct chord categories
@@ -626,141 +639,60 @@ function App() {
   }, []);
 
   const renderSongList = () => {
-    const songsByChordCount: { [key: number]: Song[] } = {};
-    const songsWithErrors: Song[] = [];
-    let tracksWithAllChordsParsed = 0;
-    let tracksWithParsingErrors = 0;
+    const allSongs = CORPUS.sort((a, b) => a.Title.localeCompare(b.Title));
 
-    CORPUS.forEach((song) => {
-      const stats = songStats[song.filename] || {
-        nonParsedChords: 0,
-        distinctChords: 0,
-      };
-      const hasErrors = songParsingErrors[song.filename];
-
-      if (hasErrors) {
-        songsWithErrors.push(song);
-        tracksWithParsingErrors++;
-      } else {
-        tracksWithAllChordsParsed++;
-        const chordCount = stats.distinctChords;
-        if (!songsByChordCount[chordCount]) {
-          songsByChordCount[chordCount] = [];
-        }
-        songsByChordCount[chordCount].push(song);
-      }
-    });
+    const tracksWithAllChordsParsed = allSongs.filter(
+      (song) => !songParsingErrors[song.filename]
+    ).length;
+    const tracksWithParsingErrors = allSongs.filter(
+      (song) => songParsingErrors[song.filename]
+    ).length;
 
     return (
       <>
         <div>
+          <p>Total tracks: {allSongs.length}</p>
           <p>Tracks with all chords parsed: {tracksWithAllChordsParsed}</p>
           <p>Tracks with parsing errors: {tracksWithParsingErrors}</p>
         </div>
         <SongListContainer>
-          {Object.entries(songsByChordCount)
-            .sort(([a], [b]) => Number(a) - Number(b))
-            .map(([chordCount, songs]) => (
-              <SongSection key={chordCount}>
-                <h3>
-                  {chordCount} distinct chords ({songs.length})
-                </h3>
-                <SongList>
-                  {songs.map((song) => {
-                    const squashedChords = getSquashedChords(song.chords);
-                    const totalWidth = calculateTotalWidth(squashedChords);
-                    const totalHeight = calculateTotalHeight(squashedChords);
+          {allSongs.slice(0, visibleSongs).map((song) => {
+            const stats = songStats[song.filename] || { distinctChords: 0 };
+            const hasErrors = !!songParsingErrors[song.filename];
 
-                    return (
-                      <SongItem
-                        key={song.filename}
-                        onMouseEnter={() => handleMouseEnter(song.filename)}
-                        onMouseLeave={() => handleMouseLeave(song.filename)}
-                        style={{
-                          width: `${totalWidth}px`,
-                          height: `${totalHeight + 20}px`, // Add extra height for the link
-                        }}
-                      >
-                        <SongLinkContainer>
-                          <SongLink
-                            href={`#${song.filename}`}
-                            onClick={() => handleSongClick(song.filename)}
-                          >
-                            {song.Title}
-                          </SongLink>
-                          <VolumeIcon
-                            isPlaying={previewPlayingSong === song.filename}
-                            onMouseEnter={() => handleSongPreviewHover(song)}
-                            onMouseLeave={handleSongPreviewLeave}
-                          />
-                        </SongLinkContainer>
-                        <SongPreview height={totalHeight}>
-                          {(hoveredSongs[song.filename] ||
-                            previewPlayingSong === song.filename ||
-                            autoPreviewSongs.includes(song.filename) ||
-                            previewedSongs[song.filename]) && (
-                            <ChordLine
-                              repLevel={4}
-                              chords={squashedChords}
-                              currentChordIndex={null}
-                              handleChordHover={() => {}}
-                              handleChordLeave={() => {}}
-                              playChord={() => {}}
-                              showOnlyLastRep={true}
-                              directIndex={
-                                previewPlayingSong === song.filename
-                                  ? previewCurrentChordIndex
-                                  : null
-                              }
-                              verticalOffset={calculateVerticalOffset(
-                                squashedChords
-                              )}
-                              totalWidth={totalWidth}
-                              totalHeight={totalHeight}
-                            />
-                          )}
-                        </SongPreview>
-                      </SongItem>
-                    );
-                  })}
-                </SongList>
-              </SongSection>
-            ))}
-          {songsWithErrors.length > 0 && (
-            <SongSection>
-              <h3>Songs with parsing errors ({songsWithErrors.length})</h3>
-              <SongList>
-                {songsWithErrors.map((song) => (
-                  <SongItem key={song.filename}>
-                    <SongLink
-                      href={`#${song.filename}`}
-                      onClick={() => handleSongClick(song.filename)}
-                      hasErrors={true}
-                    >
-                      {song.Title}
-                    </SongLink>
-                    <div style={{ display: "flex", flexWrap: "wrap" }}>
-                      {songParsingErrors[song.filename].map((chord, index) => (
-                        <span
-                          key={index}
-                          onMouseEnter={() => handleChordHover(chord)}
-                          onMouseLeave={handleChordLeave}
-                          style={{
-                            backgroundColor: "#f0f0f0",
-                            padding: "2px 5px",
-                            margin: "0 2px",
-                            borderRadius: "3px",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {chord}
-                        </span>
-                      ))}
-                    </div>
-                  </SongItem>
-                ))}
-              </SongList>
-            </SongSection>
+            return (
+              <SongItem
+                key={song.filename}
+                onMouseEnter={() => handleMouseEnter(song.filename)}
+                onMouseLeave={() => handleMouseLeave(song.filename)}
+              >
+                <SongLinkContainer>
+                  <SongLink
+                    href={`#${song.filename}`}
+                    onClick={() => handleSongClick(song.filename)}
+                    hasErrors={hasErrors}
+                  >
+                    {song.Title} ({stats.distinctChords} chords)
+                  </SongLink>
+                  <VolumeIcon
+                    isPlaying={previewPlayingSong === song.filename}
+                    onMouseEnter={() => handleSongPreviewHover(song)}
+                    onMouseLeave={handleSongPreviewLeave}
+                  />
+                </SongLinkContainer>
+                {(hoveredSongs[song.filename] ||
+                  previewPlayingSong === song.filename ||
+                  autoPreviewSongs.includes(song.filename) ||
+                  previewedSongs[song.filename]) && (
+                  <SongPreviewComponent song={song} />
+                )}
+              </SongItem>
+            );
+          })}
+          {visibleSongs < allSongs.length && (
+            <div ref={loadMoreRef} style={{ height: "20px" }}>
+              Loading more...
+            </div>
           )}
         </SongListContainer>
       </>
@@ -914,5 +846,46 @@ function getLinearIndex(
   }
   return linearIndex + chordNameIndex;
 }
+
+// Rename this component
+const SongPreviewComponent: React.FC<{ song: Song }> = React.memo(
+  ({ song }) => {
+    const [squashedChords, setSquashedChords] = useState<SquashedChordInfo[]>(
+      []
+    );
+    const [totalWidth, setTotalWidth] = useState(0);
+    const [totalHeight, setTotalHeight] = useState(0);
+
+    useEffect(() => {
+      const chords = getSquashedChords(song.chords);
+      setSquashedChords(chords);
+      setTotalWidth(calculateTotalWidth(chords));
+      setTotalHeight(calculateTotalHeight(chords));
+    }, [song]);
+
+    return (
+      <SongPreviewContainer height={totalHeight}>
+        <ChordLine
+          repLevel={4}
+          chords={squashedChords}
+          currentChordIndex={null}
+          handleChordHover={() => {}}
+          handleChordLeave={() => {}}
+          playChord={() => {}}
+          showOnlyLastRep={true}
+          directIndex={null}
+          verticalOffset={calculateVerticalOffset(squashedChords)}
+          totalWidth={totalWidth}
+          totalHeight={totalHeight}
+        />
+      </SongPreviewContainer>
+    );
+  }
+);
+
+const SongPreviewContainer = styled.div<{ height: number }>`
+  height: ${(props) => props.height}px;
+  overflow: hidden;
+`;
 
 export default App;
