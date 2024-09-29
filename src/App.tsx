@@ -17,6 +17,7 @@ import AlternativeChordRepresentation, {
   calculateVerticalOffset,
   ChordInfo,
   calculateTotalWidth,
+  calculateTotalHeight,
 } from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
@@ -66,7 +67,7 @@ const SongItem = styled.div`
   display: inline-block;
   margin-right: 10px;
   margin-bottom: 10px;
-  width: 100%; // Ensure it takes full width
+  width: 100%;
 `;
 
 const Column = styled.div`
@@ -87,10 +88,11 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
   }
 `;
 
-const SongPreview = styled.div`
-  overflow-x: visible; // Change from scroll to visible
-  overflow-y: visible; // Change from auto to visible
-  width: 100%; // Ensure it takes full width
+const SongPreview = styled.div<{ height: number }>`
+  overflow-x: visible;
+  overflow-y: visible;
+  width: 100%;
+  height: ${(props) => props.height}px;
 `;
 
 const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
@@ -666,13 +668,17 @@ function App() {
                   {songs.map((song) => {
                     const squashedChords = getSquashedChords(song.chords);
                     const totalWidth = calculateTotalWidth(squashedChords);
+                    const totalHeight = calculateTotalHeight(squashedChords);
 
                     return (
                       <SongItem
                         key={song.filename}
                         onMouseEnter={() => handleMouseEnter(song.filename)}
                         onMouseLeave={() => handleMouseLeave(song.filename)}
-                        style={{ width: `${totalWidth}px` }} // Set width here
+                        style={{
+                          width: `${totalWidth}px`,
+                          height: `${totalHeight}px`,
+                        }}
                       >
                         <SongLink
                           href={`#${song.filename}`}
@@ -685,7 +691,7 @@ function App() {
                           onMouseEnter={() => handleSongPreviewHover(song)}
                           onMouseLeave={handleSongPreviewLeave}
                         />
-                        <SongPreview style={{ width: `${totalWidth}px` }}>
+                        <SongPreview height={totalHeight}>
                           {(hoveredSongs[song.filename] ||
                             previewPlayingSong === song.filename ||
                             autoPreviewSongs.includes(song.filename) ||
@@ -706,7 +712,8 @@ function App() {
                               verticalOffset={calculateVerticalOffset(
                                 squashedChords
                               )}
-                              totalWidth={totalWidth} // Pass totalWidth here
+                              totalWidth={totalWidth}
+                              totalHeight={totalHeight}
                             />
                           )}
                         </SongPreview>

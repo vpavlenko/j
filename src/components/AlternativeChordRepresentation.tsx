@@ -13,6 +13,11 @@ const GAP_WIDTH = 12;
 const CHORD_VERTICAL_OFFSET = 15;
 const ROOT_DIFFERENCE_OFFSET = -1;
 
+// Add these constants at the top of the file
+const BASE_CHORD_HEIGHT = 30;
+const MAX_VERTICAL_OFFSET = CHORD_VERTICAL_OFFSET * 2;
+const ADDITIONAL_PADDING = 20;
+
 // Add this new constant
 const CHORD_LEVEL = {
   MINOR: 0,
@@ -203,9 +208,21 @@ const TwoLineChord: React.FC<{
 );
 
 export function calculateTotalWidth(chords: SquashedChordInfo[]): number {
-  const chordWidth = 40; // Adjust this based on your actual chord width
-  const spacing = 10; // Adjust this based on your actual spacing
-  return chords.length * (chordWidth + spacing);
+  return chords.length * (CHORD_WIDTH + GAP_WIDTH);
+}
+
+// Add this function to calculate the total height
+export function calculateTotalHeight(chords: SquashedChordInfo[]): number {
+  const maxOffset = Math.max(
+    ...chords.map((chord) =>
+      chord.isMinor
+        ? 0
+        : chord.isMajor
+        ? CHORD_VERTICAL_OFFSET * 2
+        : CHORD_VERTICAL_OFFSET
+    )
+  );
+  return BASE_CHORD_HEIGHT + maxOffset + ADDITIONAL_PADDING;
 }
 
 export function ChordLine({
@@ -219,7 +236,8 @@ export function ChordLine({
   directIndex = null,
   verticalOffset = 0,
   totalWidth, // New prop
-}: ChordLineProps & { totalWidth?: number }) {
+  totalHeight, // Add this prop
+}: ChordLineProps & { totalWidth?: number; totalHeight?: number }) {
   const renderChord = (chordInfo: SquashedChordInfo, index: number) => {
     const shouldHighlight = showOnlyLastRep
       ? directIndex === index
@@ -292,7 +310,8 @@ export function ChordLine({
       className={`chord-line rep-${repLevel}`}
       style={{
         transform: `translateY(${verticalOffset}px)`,
-        width: totalWidth ? `${totalWidth}px` : "auto", // Use totalWidth if provided
+        width: totalWidth ? `${totalWidth}px` : "auto",
+        height: totalHeight ? `${totalHeight}px` : "auto", // Use totalHeight
       }}
     >
       {chords.map(renderChord)}
@@ -399,6 +418,10 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
     () => calculateTotalWidth(squashedChords),
     [squashedChords]
   );
+  const totalHeight = useMemo(
+    () => calculateTotalHeight(squashedChords),
+    [squashedChords]
+  );
 
   useEffect(() => {
     return () => {
@@ -421,6 +444,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             directIndex={directIndex}
             verticalOffset={verticalOffset}
             totalWidth={totalWidth}
+            totalHeight={totalHeight}
           />
         ) : (
           <>
@@ -438,6 +462,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 playChord={playChord}
                 verticalOffset={verticalOffset}
                 totalWidth={totalWidth}
+                totalHeight={totalHeight}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -450,6 +475,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 playChord={playChord}
                 verticalOffset={verticalOffset}
                 totalWidth={totalWidth}
+                totalHeight={totalHeight}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -462,6 +488,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 playChord={playChord}
                 verticalOffset={verticalOffset}
                 totalWidth={totalWidth}
+                totalHeight={totalHeight}
               />
             </div>
           </>
