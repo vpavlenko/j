@@ -24,6 +24,7 @@ import AlternativeChordRepresentation, {
   ChordInfo,
   calculateTotalWidth,
   calculateTotalHeight,
+  RootDifferenceLegend,
 } from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
@@ -120,6 +121,12 @@ const getSquashedChords = (chords: string[][]): SquashedChordInfo[] => {
     []
   );
 };
+
+const Header = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 10px;
+`;
 
 function App() {
   const [selectedSong, setSelectedSong] = useState<string | null>(null);
@@ -704,7 +711,10 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Jazz Standards Corpus</h1>
+      <Header>
+        <h1>Jazz Standards Corpus</h1>
+        <RootDifferenceLegend />
+      </Header>
       {!selectedSong ? (
         renderSongList()
       ) : (

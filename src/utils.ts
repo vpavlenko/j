@@ -56,12 +56,12 @@ export function getRootDifferenceColor(difference: number): string {
   const colorMap: { [key: string]: string } = {
     1: "#ff0000", // Dark Red
     2: "#008c00", // Dark Green (20% lighter)
-    3: "#00008B", // Dark Blue
+    3: "#0000AB", // Dark Blue
     4: "#FFA500", // Orange
     5: "#000000", // Black
     "-5": "#aaa", // Gray
     "-4": "#FFFF00", // Yellow
-    "-3": "#1E90FF", // Light Blue (Dodger Blue)
+    "-3": "#5ED0FF", // Light Blue (Dodger Blue)
     "-2": "#90EE90", // Light Green
     "-1": "#FFB6C1", // Rose Pink
     "6": "turquoise",

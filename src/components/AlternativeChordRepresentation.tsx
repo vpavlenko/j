@@ -431,6 +431,44 @@ const renderRootDifference = (
   );
 };
 
+// Update the RootDifferenceLegend component
+const RootDifferenceLegend: React.FC = () => {
+  const differences = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6];
+
+  return (
+    <span style={{ marginLeft: "10px" }}>
+      {differences.map((diff) => {
+        const backgroundColor =
+          diff === 0 ? "transparent" : getRootDifferenceColor(diff);
+        const color = diff === 0 ? "black" : getContrastColor(backgroundColor);
+        return (
+          <span
+            key={diff}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: "20px",
+              height: "20px",
+              backgroundColor,
+              color,
+              fontSize: "0.8em",
+              fontWeight: "bold",
+              borderRadius: diff === 0 ? "none" : "50%",
+              marginRight: "2px",
+            }}
+          >
+            {diff === 0 ? "=" : diff}
+          </span>
+        );
+      })}
+    </span>
+  );
+};
+
+// Export the new component
+export { RootDifferenceLegend };
+
 const AlternativeChordRepresentation: React.FC<Props> = ({
   chords,
   currentChordIndex,
