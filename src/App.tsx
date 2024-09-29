@@ -64,15 +64,25 @@ const SongList = styled.div`
 `;
 
 const SongItem = styled.div`
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
   margin-right: 10px;
   margin-bottom: 10px;
   width: 100%;
 `;
 
+const SongLinkContainer = styled.div`
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+`;
+
 const SongLink = styled.a<{ hasErrors?: boolean }>`
   text-decoration: none;
   color: ${(props) => (props.hasErrors ? "red" : "gray")};
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     text-decoration: underline;
@@ -668,20 +678,22 @@ function App() {
                         onMouseLeave={() => handleMouseLeave(song.filename)}
                         style={{
                           width: `${totalWidth}px`,
-                          height: `${totalHeight}px`,
+                          height: `${totalHeight + 20}px`, // Add extra height for the link
                         }}
                       >
-                        <SongLink
-                          href={`#${song.filename}`}
-                          onClick={() => handleSongClick(song.filename)}
-                        >
-                          {song.Title}
-                        </SongLink>
-                        <VolumeIcon
-                          isPlaying={previewPlayingSong === song.filename}
-                          onMouseEnter={() => handleSongPreviewHover(song)}
-                          onMouseLeave={handleSongPreviewLeave}
-                        />
+                        <SongLinkContainer>
+                          <SongLink
+                            href={`#${song.filename}`}
+                            onClick={() => handleSongClick(song.filename)}
+                          >
+                            {song.Title}
+                          </SongLink>
+                          <VolumeIcon
+                            isPlaying={previewPlayingSong === song.filename}
+                            onMouseEnter={() => handleSongPreviewHover(song)}
+                            onMouseLeave={handleSongPreviewLeave}
+                          />
+                        </SongLinkContainer>
                         <SongPreview height={totalHeight}>
                           {(hoveredSongs[song.filename] ||
                             previewPlayingSong === song.filename ||
