@@ -80,10 +80,10 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
   }
 `;
 
-const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
+const VolumeIcon = styled(FaVolumeUp)<{ $isPlaying: boolean }>`
   margin-left: 5px;
   cursor: pointer;
-  color: ${(props) => (props.isPlaying ? "#4CAF50" : "inherit")};
+  color: ${(props) => (props.$isPlaying ? "#4CAF50" : "inherit")};
 `;
 
 const getSquashedChords = (chords: string[][]): SquashedChordInfo[] => {
@@ -158,8 +158,9 @@ function App() {
 
   const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
 
-  const [visibleSongs, setVisibleSongs] = useState<number>(20);
   const [processedSongs, setProcessedSongs] = useState<Song[]>([]);
+  const [visibleSongs, setVisibleSongs] = useState<number>(20);
+  const [parsedSongs, setParsedSongs] = useState<{ [key: string]: Song }>({});
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0,
@@ -172,65 +173,26 @@ function App() {
   }, [inView]);
 
   useEffect(() => {
-    // Sort songs alphabetically and take the first 20
-    const initialSongs = CORPUS.sort((a, b) =>
-      a.Title.localeCompare(b.Title)
-    ).slice(0, 20);
-    setProcessedSongs(initialSongs);
-
-    // Process the rest of the songs in the background
-    const processSongsInChunks = async () => {
-      const chunkSize = 50;
-      for (let i = 20; i < CORPUS.length; i += chunkSize) {
-        const chunk = CORPUS.slice(i, i + chunkSize);
-        await new Promise((resolve) => setTimeout(resolve, 0)); // Allow UI to update
-        setProcessedSongs((prev) => [...prev, ...chunk]);
-      }
-    };
-
-    processSongsInChunks();
+    // Sort songs alphabetically and set them as processedSongs
+    const sortedSongs = CORPUS.sort((a, b) => a.Title.localeCompare(b.Title));
+    setProcessedSongs(sortedSongs);
   }, []);
 
-  useEffect(() => {
-    // Function to get songs from the first six distinct chord categories
-    const getSongsFromFirstSixCategories = () => {
-      const songsByChordCount: { [key: number]: Song[] } = {};
-      CORPUS.forEach((song) => {
-        const stats = songStats[song.filename] || { distinctChords: 0 };
-        const chordCount = stats.distinctChords;
-        if (!songParsingErrors[song.filename]) {
-          if (!songsByChordCount[chordCount]) {
-            songsByChordCount[chordCount] = [];
-          }
-          songsByChordCount[chordCount].push(song);
-        }
-      });
+  const parseChords = useCallback(
+    (song: Song) => {
+      if (parsedSongs[song.filename]) {
+        return parsedSongs[song.filename];
+      }
 
-      const sortedColumns = Object.entries(songsByChordCount)
-        .sort(([a], [b]) => Number(a) - Number(b))
-        .slice(0, 6);
+      // Perform chord parsing here
+      const parsedChords = getSquashedChords(song.chords);
+      const parsedSong = { ...song, parsedChords };
 
-      return sortedColumns.flatMap(([, songs]) =>
-        songs.map((song) => song.filename)
-      );
-    };
-
-    // Set the songs to auto-preview
-    const songsToPreview = getSongsFromFirstSixCategories();
-    setAutoPreviewSongs(songsToPreview);
-
-    // Simulate hover for these songs
-    songsToPreview.forEach((filename) => {
-      handleMouseEnter(filename);
-    });
-
-    // Clean up function
-    return () => {
-      songsToPreview.forEach((filename) => {
-        setHoveredSongs((prev) => ({ ...prev, [filename]: false }));
-      });
-    };
-  }, [songStats, songParsingErrors]);
+      setParsedSongs((prev) => ({ ...prev, [song.filename]: parsedSong }));
+      return parsedSong;
+    },
+    [parsedSongs]
+  );
 
   const stopAllPlayback = useCallback(() => {
     Tone.Transport.stop();
@@ -627,10 +589,11 @@ function App() {
     (song: Song) => {
       if (!sampler) return;
 
-      setPreviewPlayingSong(song.filename);
-      playPreview(song);
+      const parsedSong = parseChords(song);
+      setPreviewPlayingSong(parsedSong.filename);
+      playPreview(parsedSong);
     },
-    [sampler, playPreview]
+    [sampler, parseChords, playPreview]
   );
 
   const handleSongPreviewLeave = useCallback(() => {
@@ -649,9 +612,10 @@ function App() {
         </div>
         <SongListContainer>
           {processedSongs.slice(0, visibleSongs).map((song) => {
+            const uniqueKey = `${song.filename}-${song.Title}`;
             return (
               <SongItem
-                key={song.filename}
+                key={uniqueKey}
                 onMouseEnter={() => handleMouseEnter(song.filename)}
                 onMouseLeave={() => handleMouseLeave(song.filename)}
               >
@@ -663,7 +627,7 @@ function App() {
                     {song.Title}
                   </SongLink>
                   <VolumeIcon
-                    isPlaying={previewPlayingSong === song.filename}
+                    $isPlaying={previewPlayingSong === song.filename}
                     onMouseEnter={() => handleSongPreviewHover(song)}
                     onMouseLeave={handleSongPreviewLeave}
                   />
@@ -672,7 +636,7 @@ function App() {
                   previewPlayingSong === song.filename ||
                   autoPreviewSongs.includes(song.filename) ||
                   previewedSongs[song.filename]) && (
-                  <SongPreviewComponent song={song} />
+                  <SongPreviewComponent song={parseChords(song)} />
                 )}
               </SongItem>
             );

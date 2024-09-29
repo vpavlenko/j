@@ -53,27 +53,25 @@ const ChordLinesWrapper = styled.div`
   padding: 20px 0;
 `;
 
-const ChordSpan = styled.span<{
-  highlight?: boolean;
-  left: number;
-  top?: string;
+const ChordSpan = styled.span.attrs<{
+  $left: number;
+  $top: number;
+  $backgroundColor: string;
+}>((props) => ({
+  style: {
+    left: `${props.$left}px`,
+    top: `${props.$top}px`,
+    backgroundColor: props.$backgroundColor,
+  },
+}))<{
+  $highlight: boolean;
 }>`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  width: ${CHORD_WIDTH}px;
-  height: 30px;
   position: absolute;
-  left: ${(props) => props.left}px;
-  top: ${(props) => props.top || "0"};
-  cursor: pointer;
-  line-height: 0.9;
   ${(props) =>
-    props.highlight &&
+    props.$highlight &&
     `
-    background-color: yellow;
     font-weight: bold;
+    text-decoration: underline;
   `}
 `;
 
@@ -172,7 +170,7 @@ const TwoLineChord: React.FC<{
   onMouseLeave: () => void;
   onClick: () => void;
   left: number;
-  top?: string;
+  top?: number; // Change this to number
 }> = ({
   root,
   suffix,
@@ -184,12 +182,13 @@ const TwoLineChord: React.FC<{
   top,
 }) => (
   <ChordSpan
-    highlight={highlight}
+    $highlight={highlight}
+    $left={left}
+    $top={top ?? 0} // Use nullish coalescing to default to 0
+    $backgroundColor="transparent"
     onMouseEnter={onMouseEnter}
     onMouseLeave={onMouseLeave}
     onClick={onClick}
-    left={left}
-    top={top}
   >
     <ChordRoot>{root}</ChordRoot>
     <ChordSuffix>
@@ -264,6 +263,7 @@ export function ChordLine({
             onMouseLeave={handleChordLeave}
             onClick={() => playChord(chordInfo.chord)}
             left={index * (CHORD_WIDTH + GAP_WIDTH)}
+            top={chordLevel} // Pass chordLevel as a number
           />
         );
       case 3:
@@ -271,12 +271,13 @@ export function ChordLine({
         return (
           <React.Fragment key={`rep-${repLevel}-${index}`}>
             <ChordSpan
-              highlight={shouldHighlight}
+              $highlight={shouldHighlight}
+              $left={index * (CHORD_WIDTH + GAP_WIDTH)}
+              $top={chordLevel}
+              $backgroundColor="transparent"
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
               onMouseLeave={handleChordLeave}
               onClick={() => playChord(chordInfo.chord)}
-              left={index * (CHORD_WIDTH + GAP_WIDTH)}
-              top={`${chordLevel}px`}
             >
               {repLevel === 3 ? (
                 <TwoLineChord
