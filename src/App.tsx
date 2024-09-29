@@ -140,7 +140,7 @@ function App() {
 
   const [isHoveringChords, setIsHoveringChords] = useState(false);
 
-  const [songStats, setSongStats] = useState<{
+  const [, setSongStats] = useState<{
     [key: string]: { nonParsedChords: number; distinctChords: number };
   }>({});
 
@@ -156,7 +156,7 @@ function App() {
   );
   const [, setPreviewCurrentChordIndex] = useState<number | null>(null);
 
-  const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
+  const [autoPreviewSongs] = useState<string[]>([]);
 
   const [processedSongs, setProcessedSongs] = useState<Song[]>([]);
   const [visibleSongs, setVisibleSongs] = useState<number>(20);
@@ -613,6 +613,7 @@ function App() {
         <SongListContainer>
           {processedSongs.slice(0, visibleSongs).map((song) => {
             const uniqueKey = `${song.filename}-${song.Title}`;
+            const hasErrors = songParsingErrors[song.filename]?.length > 0;
             return (
               <SongItem
                 key={uniqueKey}
@@ -623,20 +624,30 @@ function App() {
                   <SongLink
                     href={`#${song.filename}`}
                     onClick={() => handleSongClick(song.filename)}
+                    hasErrors={hasErrors}
                   >
                     {song.Title}
                   </SongLink>
-                  <VolumeIcon
-                    $isPlaying={previewPlayingSong === song.filename}
-                    onMouseEnter={() => handleSongPreviewHover(song)}
-                    onMouseLeave={handleSongPreviewLeave}
-                  />
+                  {!hasErrors && (
+                    <VolumeIcon
+                      $isPlaying={previewPlayingSong === song.filename}
+                      onMouseEnter={() => handleSongPreviewHover(song)}
+                      onMouseLeave={handleSongPreviewLeave}
+                    />
+                  )}
                 </SongLinkContainer>
-                {(hoveredSongs[song.filename] ||
-                  previewPlayingSong === song.filename ||
-                  autoPreviewSongs.includes(song.filename) ||
-                  previewedSongs[song.filename]) && (
-                  <SongPreviewComponent song={parseChords(song)} />
+                {hasErrors ? (
+                  <ErrorChords>
+                    Parsing errors:{" "}
+                    {songParsingErrors[song.filename].join(", ")}
+                  </ErrorChords>
+                ) : (
+                  (hoveredSongs[song.filename] ||
+                    previewPlayingSong === song.filename ||
+                    autoPreviewSongs.includes(song.filename) ||
+                    previewedSongs[song.filename]) && (
+                    <SongPreviewComponent song={parseChords(song)} />
+                  )
                 )}
               </SongItem>
             );
@@ -838,6 +849,12 @@ const SongPreviewComponent: React.FC<{ song: Song }> = React.memo(
 const SongPreviewContainer = styled.div<{ height: number }>`
   height: ${(props) => props.height}px;
   overflow: hidden;
+`;
+
+const ErrorChords = styled.div`
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
 `;
 
 export default App;
