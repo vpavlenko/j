@@ -67,12 +67,18 @@ const ChordSpan = styled.span.attrs<{
   $highlight: boolean;
 }>`
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: ${CHORD_WIDTH}px;
   ${(props) =>
     props.$highlight &&
     `
     font-weight: bold;
     text-decoration: underline;
   `}
+  text-align: center;
 `;
 
 const ChordRoot = styled.div`
@@ -291,6 +297,7 @@ export const ChordLine: React.FC<ChordLineProps> = ({
     );
 
     const chordLevel = getChordLevel(chordInfo, verticalOffset);
+    const chordPosition = index * (CHORD_WIDTH + GAP_WIDTH);
 
     switch (repLevel) {
       case 1:
@@ -304,8 +311,8 @@ export const ChordLine: React.FC<ChordLineProps> = ({
             onMouseEnter={() => handleChordHover(chordInfo.chord)}
             onMouseLeave={handleChordLeave}
             onClick={() => playChord(chordInfo.chord)}
-            left={index * (CHORD_WIDTH + GAP_WIDTH)}
-            top={chordLevel} // Pass chordLevel as a number
+            left={chordPosition}
+            top={chordLevel}
           />
         );
       case 3:
@@ -314,7 +321,7 @@ export const ChordLine: React.FC<ChordLineProps> = ({
           <React.Fragment key={`rep-${repLevel}-${index}`}>
             <ChordSpan
               $highlight={shouldHighlight}
-              $left={index * (CHORD_WIDTH + GAP_WIDTH)}
+              $left={chordPosition}
               $top={chordLevel}
               $backgroundColor="transparent"
               onMouseEnter={() => handleChordHover(chordInfo.chord)}
@@ -341,7 +348,7 @@ export const ChordLine: React.FC<ChordLineProps> = ({
             {renderRootDifference(
               chordInfo,
               index < chords.length - 1 ? chords[index + 1] : chords[0],
-              index * (CHORD_WIDTH + GAP_WIDTH) + CHORD_WIDTH,
+              chordPosition + CHORD_WIDTH,
               chordLevel,
               verticalOffset
             )}
