@@ -47,13 +47,29 @@ const RightColumn = styled.div`
 
 const SongListContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: 20px;
+`;
+
+const SongSection = styled.div`
+  margin-bottom: 20px;
+`;
+
+const SongList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+`;
+
+const SongItem = styled.div`
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 10px;
 `;
 
 const Column = styled.div`
   flex: 1;
-  min-width: 600px;
+  min-width: 100vw;
 `;
 
 const ColumnTitle = styled.h3`
@@ -72,10 +88,6 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 const SongPreview = styled.div`
   overflow-x: scroll;
   overflow-y: auto;
-`;
-
-const SongItem = styled.li`
-  position: relative;
 `;
 
 const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
@@ -643,11 +655,11 @@ function App() {
           {Object.entries(songsByChordCount)
             .sort(([a], [b]) => Number(a) - Number(b))
             .map(([chordCount, songs]) => (
-              <Column key={chordCount}>
-                <ColumnTitle>
+              <SongSection key={chordCount}>
+                <h3>
                   {chordCount} distinct chords ({songs.length})
-                </ColumnTitle>
-                <ul style={{ listStyleType: "none", padding: 0 }}>
+                </h3>
+                <SongList>
                   {songs.map((song) => (
                     <SongItem
                       key={song.filename}
@@ -691,17 +703,15 @@ function App() {
                       </SongPreview>
                     </SongItem>
                   ))}
-                </ul>
-              </Column>
+                </SongList>
+              </SongSection>
             ))}
           {songsWithErrors.length > 0 && (
-            <Column>
-              <ColumnTitle>
-                Songs with parsing errors ({songsWithErrors.length})
-              </ColumnTitle>
-              <ul style={{ listStyleType: "none", padding: 0 }}>
+            <SongSection>
+              <h3>Songs with parsing errors ({songsWithErrors.length})</h3>
+              <SongList>
                 {songsWithErrors.map((song) => (
-                  <li key={song.filename}>
+                  <SongItem key={song.filename}>
                     <SongLink
                       href={`#${song.filename}`}
                       onClick={() => handleSongClick(song.filename)}
@@ -727,10 +737,10 @@ function App() {
                         </span>
                       ))}
                     </div>
-                  </li>
+                  </SongItem>
                 ))}
-              </ul>
-            </Column>
+              </SongList>
+            </SongSection>
           )}
         </SongListContainer>
       </>
