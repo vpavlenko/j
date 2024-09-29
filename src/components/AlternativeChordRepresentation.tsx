@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import {
   getRootDifference,
@@ -202,27 +202,24 @@ const TwoLineChord: React.FC<{
   </ChordSpan>
 );
 
-export const ChordLine: React.FC<{
-  repLevel: number;
-  chords: SquashedChordInfo[];
-  currentChordIndex: number | null;
-  handleChordHover: (chord: string) => void;
-  handleChordLeave: () => void;
-  playChord: (chord: string) => void;
-  showOnlyLastRep?: boolean;
-  directIndex?: number | null;
-  verticalOffset: number;
-}> = ({
+export function calculateTotalWidth(chords: SquashedChordInfo[]): number {
+  const chordWidth = 40; // Adjust this based on your actual chord width
+  const spacing = 10; // Adjust this based on your actual spacing
+  return chords.length * (chordWidth + spacing);
+}
+
+export function ChordLine({
   repLevel,
   chords,
   currentChordIndex,
   handleChordHover,
   handleChordLeave,
   playChord,
-  showOnlyLastRep,
-  directIndex,
-  verticalOffset,
-}) => {
+  showOnlyLastRep = false,
+  directIndex = null,
+  verticalOffset = 0,
+  totalWidth, // New prop
+}: ChordLineProps & { totalWidth?: number }) {
   const renderChord = (chordInfo: SquashedChordInfo, index: number) => {
     const shouldHighlight = showOnlyLastRep
       ? directIndex === index
@@ -290,8 +287,18 @@ export const ChordLine: React.FC<{
     }
   };
 
-  return <ChordLineWrapper>{chords.map(renderChord)}</ChordLineWrapper>;
-};
+  return (
+    <div
+      className={`chord-line rep-${repLevel}`}
+      style={{
+        transform: `translateY(${verticalOffset}px)`,
+        width: totalWidth ? `${totalWidth}px` : "auto", // Use totalWidth if provided
+      }}
+    >
+      {chords.map(renderChord)}
+    </div>
+  );
+}
 
 const getChordLevel = (
   chord: SquashedChordInfo,
@@ -388,6 +395,10 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   );
 
   const verticalOffset = calculateVerticalOffset(squashedChords);
+  const totalWidth = useMemo(
+    () => calculateTotalWidth(squashedChords),
+    [squashedChords]
+  );
 
   useEffect(() => {
     return () => {
@@ -409,6 +420,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
             showOnlyLastRep={showOnlyLastRep}
             directIndex={directIndex}
             verticalOffset={verticalOffset}
+            totalWidth={totalWidth}
           />
         ) : (
           <>
@@ -425,6 +437,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
                 verticalOffset={verticalOffset}
+                totalWidth={totalWidth}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -436,6 +449,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
                 verticalOffset={verticalOffset}
+                totalWidth={totalWidth}
               />
             </div>
             <div style={{ marginBottom: "60px" }}>
@@ -447,6 +461,7 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 handleChordLeave={handleChordLeave}
                 playChord={playChord}
                 verticalOffset={verticalOffset}
+                totalWidth={totalWidth}
               />
             </div>
           </>

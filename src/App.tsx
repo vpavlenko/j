@@ -16,6 +16,7 @@ import AlternativeChordRepresentation, {
   SquashedChordInfo,
   calculateVerticalOffset,
   ChordInfo,
+  calculateTotalWidth,
 } from "./components/AlternativeChordRepresentation";
 import styled from "styled-components";
 import { Sampler } from "tone";
@@ -65,6 +66,7 @@ const SongItem = styled.div`
   display: inline-block;
   margin-right: 10px;
   margin-bottom: 10px;
+  width: 100%; // Ensure it takes full width
 `;
 
 const Column = styled.div`
@@ -86,8 +88,9 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
 `;
 
 const SongPreview = styled.div`
-  overflow-x: scroll;
-  overflow-y: auto;
+  overflow-x: visible; // Change from scroll to visible
+  overflow-y: visible; // Change from auto to visible
+  width: 100%; // Ensure it takes full width
 `;
 
 const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
@@ -660,49 +663,56 @@ function App() {
                   {chordCount} distinct chords ({songs.length})
                 </h3>
                 <SongList>
-                  {songs.map((song) => (
-                    <SongItem
-                      key={song.filename}
-                      onMouseEnter={() => handleMouseEnter(song.filename)}
-                      onMouseLeave={() => handleMouseLeave(song.filename)}
-                    >
-                      <SongLink
-                        href={`#${song.filename}`}
-                        onClick={() => handleSongClick(song.filename)}
+                  {songs.map((song) => {
+                    const squashedChords = getSquashedChords(song.chords);
+                    const totalWidth = calculateTotalWidth(squashedChords);
+
+                    return (
+                      <SongItem
+                        key={song.filename}
+                        onMouseEnter={() => handleMouseEnter(song.filename)}
+                        onMouseLeave={() => handleMouseLeave(song.filename)}
+                        style={{ width: `${totalWidth}px` }} // Set width here
                       >
-                        {song.Title}
-                      </SongLink>
-                      <VolumeIcon
-                        isPlaying={previewPlayingSong === song.filename}
-                        onMouseEnter={() => handleSongPreviewHover(song)}
-                        onMouseLeave={handleSongPreviewLeave}
-                      />
-                      <SongPreview>
-                        {(hoveredSongs[song.filename] ||
-                          previewPlayingSong === song.filename ||
-                          autoPreviewSongs.includes(song.filename) ||
-                          previewedSongs[song.filename]) && (
-                          <ChordLine
-                            repLevel={4}
-                            chords={getSquashedChords(song.chords)}
-                            currentChordIndex={null}
-                            handleChordHover={() => {}}
-                            handleChordLeave={() => {}}
-                            playChord={() => {}}
-                            showOnlyLastRep={true}
-                            directIndex={
-                              previewPlayingSong === song.filename
-                                ? previewCurrentChordIndex
-                                : null
-                            }
-                            verticalOffset={calculateVerticalOffset(
-                              getSquashedChords(song.chords)
-                            )}
-                          />
-                        )}
-                      </SongPreview>
-                    </SongItem>
-                  ))}
+                        <SongLink
+                          href={`#${song.filename}`}
+                          onClick={() => handleSongClick(song.filename)}
+                        >
+                          {song.Title}
+                        </SongLink>
+                        <VolumeIcon
+                          isPlaying={previewPlayingSong === song.filename}
+                          onMouseEnter={() => handleSongPreviewHover(song)}
+                          onMouseLeave={handleSongPreviewLeave}
+                        />
+                        <SongPreview style={{ width: `${totalWidth}px` }}>
+                          {(hoveredSongs[song.filename] ||
+                            previewPlayingSong === song.filename ||
+                            autoPreviewSongs.includes(song.filename) ||
+                            previewedSongs[song.filename]) && (
+                            <ChordLine
+                              repLevel={4}
+                              chords={squashedChords}
+                              currentChordIndex={null}
+                              handleChordHover={() => {}}
+                              handleChordLeave={() => {}}
+                              playChord={() => {}}
+                              showOnlyLastRep={true}
+                              directIndex={
+                                previewPlayingSong === song.filename
+                                  ? previewCurrentChordIndex
+                                  : null
+                              }
+                              verticalOffset={calculateVerticalOffset(
+                                squashedChords
+                              )}
+                              totalWidth={totalWidth} // Pass totalWidth here
+                            />
+                          )}
+                        </SongPreview>
+                      </SongItem>
+                    );
+                  })}
                 </SongList>
               </SongSection>
             ))}
