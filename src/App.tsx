@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import "./App.css";
 import { CORPUS } from "./corpus";
 import * as Tone from "tone";
@@ -154,7 +160,10 @@ function App() {
   const [previewPlayingSong, setPreviewPlayingSong] = useState<string | null>(
     null
   );
-  const [, setPreviewCurrentChordIndex] = useState<number | null>(null);
+  const [previewCurrentChordIndex, setPreviewCurrentChordIndex] = useState<
+    number | null
+  >(null);
+  const previewCurrentChordIndexRef = useRef<number | null>(null);
 
   const [autoPreviewSongs] = useState<string[]>([]);
 
@@ -536,6 +545,7 @@ function App() {
 
   const playPreview = useCallback(
     (song: Song) => {
+      console.log("playPreview called for song:", song.Title);
       if (!sampler) return;
 
       Tone.Transport.stop();
@@ -570,6 +580,7 @@ function App() {
             strum(sampler, midiNotes, chordDuration, playTime);
           }
           Tone.Draw.schedule(() => {
+            console.log("Setting previewCurrentChordIndex to:", index);
             setPreviewCurrentChordIndex(index);
           }, playTime);
         }, chordTime);
@@ -602,6 +613,12 @@ function App() {
     Tone.Transport.stop();
     Tone.Transport.cancel();
   }, []);
+
+  // Update the ref whenever the state changes
+  useEffect(() => {
+    console.log("previewCurrentChordIndex updated:", previewCurrentChordIndex);
+    previewCurrentChordIndexRef.current = previewCurrentChordIndex;
+  }, [previewCurrentChordIndex]);
 
   const renderSongList = () => {
     return (
@@ -646,7 +663,14 @@ function App() {
                     previewPlayingSong === song.filename ||
                     autoPreviewSongs.includes(song.filename) ||
                     previewedSongs[song.filename]) && (
-                    <SongPreviewComponent song={parseChords(song)} />
+                    <SongPreviewComponent
+                      song={parseChords(song)}
+                      currentChordIndex={
+                        previewPlayingSong === song.filename
+                          ? previewCurrentChordIndexRef.current
+                          : null
+                      }
+                    />
                   )
                 )}
               </SongItem>
@@ -811,40 +835,45 @@ function getLinearIndex(
 }
 
 // Rename this component
-const SongPreviewComponent: React.FC<{ song: Song }> = React.memo(
-  ({ song }) => {
-    const [squashedChords, setSquashedChords] = useState<SquashedChordInfo[]>(
-      []
-    );
-    const [totalWidth, setTotalWidth] = useState(0);
-    const [totalHeight, setTotalHeight] = useState(0);
+const SongPreviewComponent: React.FC<{
+  song: Song;
+  currentChordIndex: number | null;
+}> = React.memo(({ song, currentChordIndex }) => {
+  console.log(
+    "SongPreviewComponent rendered for song:",
+    song.Title,
+    "with currentChordIndex:",
+    currentChordIndex
+  );
+  const [squashedChords, setSquashedChords] = useState<SquashedChordInfo[]>([]);
+  const [totalWidth, setTotalWidth] = useState(0);
+  const [totalHeight, setTotalHeight] = useState(0);
 
-    useEffect(() => {
-      const chords = getSquashedChords(song.chords);
-      setSquashedChords(chords);
-      setTotalWidth(calculateTotalWidth(chords));
-      setTotalHeight(calculateTotalHeight(chords));
-    }, [song]);
+  useEffect(() => {
+    const chords = getSquashedChords(song.chords);
+    setSquashedChords(chords);
+    setTotalWidth(calculateTotalWidth(chords));
+    setTotalHeight(calculateTotalHeight(chords));
+  }, [song]);
 
-    return (
-      <SongPreviewContainer height={totalHeight}>
-        <ChordLine
-          repLevel={4}
-          chords={squashedChords}
-          currentChordIndex={null}
-          handleChordHover={() => {}}
-          handleChordLeave={() => {}}
-          playChord={() => {}}
-          showOnlyLastRep={true}
-          directIndex={null}
-          verticalOffset={calculateVerticalOffset(squashedChords)}
-          totalWidth={totalWidth}
-          totalHeight={totalHeight}
-        />
-      </SongPreviewContainer>
-    );
-  }
-);
+  return (
+    <SongPreviewContainer height={totalHeight}>
+      <ChordLine
+        repLevel={4}
+        chords={squashedChords}
+        currentChordIndex={currentChordIndex}
+        handleChordHover={() => {}}
+        handleChordLeave={() => {}}
+        playChord={() => {}}
+        showOnlyLastRep={true}
+        directIndex={currentChordIndex}
+        verticalOffset={calculateVerticalOffset(squashedChords)}
+        totalWidth={totalWidth}
+        totalHeight={totalHeight}
+      />
+    </SongPreviewContainer>
+  );
+});
 
 const SongPreviewContainer = styled.div<{ height: number }>`
   height: ${(props) => props.height}px;

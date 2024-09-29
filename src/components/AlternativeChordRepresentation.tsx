@@ -87,9 +87,9 @@ const ChordSuffix = styled.div`
   align-items: baseline;
 `;
 
-const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
+const RootDifference = styled.span<{ $backgroundColor: string; $left: number }>`
   position: absolute;
-  left: ${(props) => props.left}px;
+  left: ${(props) => props.$left}px;
   top: 0px;
   width: ${GAP_WIDTH}px;
   height: ${GAP_WIDTH}px;
@@ -98,8 +98,8 @@ const RootDifference = styled.span<{ backgroundColor: string; left: number }>`
   justify-content: center;
   text-align: center;
   font-size: 0.8em;
-  background-color: ${(props) => props.backgroundColor};
-  color: ${(props) => getContrastColor(props.backgroundColor)};
+  background-color: ${(props) => props.$backgroundColor};
+  color: ${(props) => getContrastColor(props.$backgroundColor)};
   font-weight: bold;
   border-radius: 50%;
 `;
@@ -241,12 +241,28 @@ export function ChordLine({
   totalWidth, // New prop
   totalHeight, // Add this prop
 }: ChordLineProps & { totalWidth?: number; totalHeight?: number }) {
+  console.log("ChordLine rendered with:", {
+    repLevel,
+    currentChordIndex,
+    showOnlyLastRep,
+    directIndex,
+  });
+
   const renderChord = (chordInfo: SquashedChordInfo, index: number) => {
     const shouldHighlight = showOnlyLastRep
       ? directIndex === index
       : currentChordIndex !== null &&
         currentChordIndex >= chordInfo.startIndex &&
         currentChordIndex <= chordInfo.endIndex;
+
+    console.log(
+      "Rendering chord:",
+      chordInfo.chord,
+      "at index:",
+      index,
+      "shouldHighlight:",
+      shouldHighlight
+    );
 
     const chordLevel = getChordLevel(chordInfo, verticalOffset);
 
@@ -316,7 +332,7 @@ export function ChordLine({
       style={{
         transform: `translateY(${verticalOffset}px)`,
         width: totalWidth ? `${totalWidth}px` : "auto",
-        height: totalHeight ? `${totalHeight}px` : "auto", // Use totalHeight
+        height: totalHeight ? `${totalHeight}px` : "auto",
       }}
     >
       {chords.map(renderChord)}
@@ -372,8 +388,8 @@ const renderRootDifference = (
 
   return (
     <RootDifference
-      backgroundColor={backgroundColor}
-      left={left}
+      $backgroundColor={backgroundColor}
+      $left={left}
       style={{
         top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
       }}
@@ -393,6 +409,12 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
   disableVerticalScroll = false,
   directIndex,
 }) => {
+  console.log("AlternativeChordRepresentation rendered with:", {
+    currentChordIndex,
+    showOnlyLastRep,
+    directIndex,
+  });
+
   const parsedChords: ChordInfo[] = chords.map((chord) => {
     const parsedChord: ParsedChord = parseChordName(chord);
     return {
