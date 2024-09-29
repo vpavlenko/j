@@ -54,16 +54,6 @@ const SongListContainer = styled.div`
   gap: 20px;
 `;
 
-const SongSection = styled.div`
-  margin-bottom: 20px;
-`;
-
-const SongList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-`;
-
 const SongItem = styled.div`
   display: flex;
   flex-direction: column;
@@ -88,13 +78,6 @@ const SongLink = styled.a<{ hasErrors?: boolean }>`
   &:hover {
     text-decoration: underline;
   }
-`;
-
-const SongPreview = styled.div<{ height: number }>`
-  overflow-x: visible;
-  overflow-y: visible;
-  width: 100%;
-  height: ${(props) => props.height}px;
 `;
 
 const VolumeIcon = styled(FaVolumeUp)<{ isPlaying: boolean }>`
@@ -171,9 +154,7 @@ function App() {
   const [previewPlayingSong, setPreviewPlayingSong] = useState<string | null>(
     null
   );
-  const [previewCurrentChordIndex, setPreviewCurrentChordIndex] = useState<
-    number | null
-  >(null);
+  const [, setPreviewCurrentChordIndex] = useState<number | null>(null);
 
   const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
 
