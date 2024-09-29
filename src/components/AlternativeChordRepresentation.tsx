@@ -361,9 +361,8 @@ export const ChordLine: React.FC<ChordLineProps> = ({
 
   return (
     <div
-      className={`chord-line rep-${repLevel}`}
       style={{
-        transform: `translateY(${verticalOffset}px)`,
+        transform: `translateY(${verticalOffset + 3}px)`,
         width: totalWidth ? `${totalWidth}px` : "auto",
         height: totalHeight ? `${totalHeight}px` : "auto",
       }}
