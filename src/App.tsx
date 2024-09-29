@@ -70,15 +70,6 @@ const SongItem = styled.div`
   width: 100%;
 `;
 
-const Column = styled.div`
-  flex: 1;
-  min-width: 100vw;
-`;
-
-const ColumnTitle = styled.h3`
-  margin-bottom: 10px;
-`;
-
 const SongLink = styled.a<{ hasErrors?: boolean }>`
   text-decoration: none;
   color: ${(props) => (props.hasErrors ? "red" : "gray")};

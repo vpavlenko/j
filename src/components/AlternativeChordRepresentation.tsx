@@ -15,7 +15,6 @@ const ROOT_DIFFERENCE_OFFSET = -1;
 
 // Add these constants at the top of the file
 const BASE_CHORD_HEIGHT = 30;
-const MAX_VERTICAL_OFFSET = CHORD_VERTICAL_OFFSET * 2;
 const ADDITIONAL_PADDING = 20;
 
 // Add this new constant
@@ -52,14 +51,6 @@ const AlternativeChordContainer = styled.div<{
 
 const ChordLinesWrapper = styled.div`
   padding: 20px 0;
-`;
-
-// Rename the styled ChordLine component to ChordLineWrapper
-const ChordLineWrapper = styled.div`
-  position: relative;
-  height: 50px;
-  margin-bottom: 20px;
-  margin-top: 10px;
 `;
 
 const ChordSpan = styled.span<{
@@ -223,6 +214,19 @@ export function calculateTotalHeight(chords: SquashedChordInfo[]): number {
     )
   );
   return BASE_CHORD_HEIGHT + maxOffset + ADDITIONAL_PADDING;
+}
+
+// Add this interface definition
+export interface ChordLineProps {
+  repLevel: number;
+  chords: SquashedChordInfo[];
+  currentChordIndex: number | null;
+  handleChordHover: (chord: string) => void;
+  handleChordLeave: () => void;
+  playChord: (chord: string) => void;
+  showOnlyLastRep?: boolean;
+  directIndex?: number | null;
+  verticalOffset?: number;
 }
 
 export function ChordLine({
