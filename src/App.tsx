@@ -158,7 +158,8 @@ function App() {
 
   const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
 
-  const [visibleSongs, setVisibleSongs] = useState<number>(100);
+  const [visibleSongs, setVisibleSongs] = useState<number>(20);
+  const [processedSongs, setProcessedSongs] = useState<Song[]>([]);
 
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0,
@@ -169,6 +170,26 @@ function App() {
       setVisibleSongs((prevVisible) => prevVisible + 100);
     }
   }, [inView]);
+
+  useEffect(() => {
+    // Sort songs alphabetically and take the first 20
+    const initialSongs = CORPUS.sort((a, b) =>
+      a.Title.localeCompare(b.Title)
+    ).slice(0, 20);
+    setProcessedSongs(initialSongs);
+
+    // Process the rest of the songs in the background
+    const processSongsInChunks = async () => {
+      const chunkSize = 50;
+      for (let i = 20; i < CORPUS.length; i += chunkSize) {
+        const chunk = CORPUS.slice(i, i + chunkSize);
+        await new Promise((resolve) => setTimeout(resolve, 0)); // Allow UI to update
+        setProcessedSongs((prev) => [...prev, ...chunk]);
+      }
+    };
+
+    processSongsInChunks();
+  }, []);
 
   useEffect(() => {
     // Function to get songs from the first six distinct chord categories
@@ -620,27 +641,14 @@ function App() {
   }, []);
 
   const renderSongList = () => {
-    const allSongs = CORPUS.sort((a, b) => a.Title.localeCompare(b.Title));
-
-    const tracksWithAllChordsParsed = allSongs.filter(
-      (song) => !songParsingErrors[song.filename]
-    ).length;
-    const tracksWithParsingErrors = allSongs.filter(
-      (song) => songParsingErrors[song.filename]
-    ).length;
-
     return (
       <>
         <div>
-          <p>Total tracks: {allSongs.length}</p>
-          <p>Tracks with all chords parsed: {tracksWithAllChordsParsed}</p>
-          <p>Tracks with parsing errors: {tracksWithParsingErrors}</p>
+          <p>Loaded tracks: {processedSongs.length}</p>
+          <p>Total tracks: {CORPUS.length}</p>
         </div>
         <SongListContainer>
-          {allSongs.slice(0, visibleSongs).map((song) => {
-            const stats = songStats[song.filename] || { distinctChords: 0 };
-            const hasErrors = !!songParsingErrors[song.filename];
-
+          {processedSongs.slice(0, visibleSongs).map((song) => {
             return (
               <SongItem
                 key={song.filename}
@@ -651,9 +659,8 @@ function App() {
                   <SongLink
                     href={`#${song.filename}`}
                     onClick={() => handleSongClick(song.filename)}
-                    hasErrors={hasErrors}
                   >
-                    {song.Title} ({stats.distinctChords} chords)
+                    {song.Title}
                   </SongLink>
                   <VolumeIcon
                     isPlaying={previewPlayingSong === song.filename}
@@ -670,7 +677,7 @@ function App() {
               </SongItem>
             );
           })}
-          {visibleSongs < allSongs.length && (
+          {visibleSongs < processedSongs.length && (
             <div ref={loadMoreRef} style={{ height: "20px" }}>
               Loading more...
             </div>
