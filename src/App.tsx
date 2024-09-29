@@ -177,8 +177,8 @@ function App() {
   const [autoPreviewSongs, setAutoPreviewSongs] = useState<string[]>([]);
 
   useEffect(() => {
-    // Function to get the first two songs from each of the first two columns
-    const getFirstTwoSongsFromTwoColumns = () => {
+    // Function to get songs from the first six distinct chord categories
+    const getSongsFromFirstSixCategories = () => {
       const songsByChordCount: { [key: number]: Song[] } = {};
       CORPUS.forEach((song) => {
         const stats = songStats[song.filename] || { distinctChords: 0 };
@@ -193,15 +193,15 @@ function App() {
 
       const sortedColumns = Object.entries(songsByChordCount)
         .sort(([a], [b]) => Number(a) - Number(b))
-        .slice(0, 10);
+        .slice(0, 6);
 
       return sortedColumns.flatMap(([, songs]) =>
-        songs.slice(0, 20).map((song) => song.filename)
+        songs.map((song) => song.filename)
       );
     };
 
     // Set the songs to auto-preview
-    const songsToPreview = getFirstTwoSongsFromTwoColumns();
+    const songsToPreview = getSongsFromFirstSixCategories();
     setAutoPreviewSongs(songsToPreview);
 
     // Simulate hover for these songs
