@@ -545,7 +545,6 @@ function App() {
 
   const playPreview = useCallback(
     (song: Song) => {
-      console.log("playPreview called for song:", song.Title);
       if (!sampler) return;
 
       Tone.Transport.stop();
@@ -558,18 +557,19 @@ function App() {
       const secondsPerBeat = 60 / bpm;
       const secondsPerBar = secondsPerBeat * song.TimeSig[0];
 
-      // Get the last rep of chords (already squashed)
       const lastRepChords = song.chords
         .flat()
         .flatMap((chord) => chord.split(" "));
 
-      // Remove consecutive duplicates
       const uniqueChords = lastRepChords.filter(
         (chord, index, array) => index === 0 || chord !== array[index - 1]
       );
 
-      const chordDuration = secondsPerBar; // Fixed duration for each chord
+      const chordDuration = secondsPerBar;
       const totalTime = uniqueChords.length * chordDuration;
+
+      // Highlight the first chord immediately
+      setPreviewCurrentChordIndex(0);
 
       uniqueChords.forEach((chord, index) => {
         const chordTime = index * chordDuration;
@@ -580,8 +580,7 @@ function App() {
             strum(sampler, midiNotes, chordDuration, playTime);
           }
           Tone.Draw.schedule(() => {
-            console.log("Setting previewCurrentChordIndex to:", index);
-            setPreviewCurrentChordIndex(index);
+            setPreviewCurrentChordIndex(index + 1);
           }, playTime);
         }, chordTime);
       });
@@ -616,7 +615,6 @@ function App() {
 
   // Update the ref whenever the state changes
   useEffect(() => {
-    console.log("previewCurrentChordIndex updated:", previewCurrentChordIndex);
     previewCurrentChordIndexRef.current = previewCurrentChordIndex;
   }, [previewCurrentChordIndex]);
 
@@ -839,12 +837,6 @@ const SongPreviewComponent: React.FC<{
   song: Song;
   currentChordIndex: number | null;
 }> = React.memo(({ song, currentChordIndex }) => {
-  console.log(
-    "SongPreviewComponent rendered for song:",
-    song.Title,
-    "with currentChordIndex:",
-    currentChordIndex
-  );
   const [squashedChords, setSquashedChords] = useState<SquashedChordInfo[]>([]);
   const [totalWidth, setTotalWidth] = useState(0);
   const [totalHeight, setTotalHeight] = useState(0);

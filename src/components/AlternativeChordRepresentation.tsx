@@ -228,7 +228,23 @@ export interface ChordLineProps {
   verticalOffset?: number;
 }
 
-export function ChordLine({
+const ChordBox = styled.div<{
+  $isHighlighted: boolean;
+  $isHovered: boolean;
+  $isAvailable: boolean;
+}>`
+  display: inline-block;
+  padding: 2px 4px;
+  margin: 2px;
+  border: 1px solid ${(props) => (props.$isAvailable ? "#ccc" : "red")};
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: ${(props) =>
+    props.$isHighlighted ? "yellow" : props.$isHovered ? "#f0f0f0" : "white"};
+  color: ${(props) => (props.$isAvailable ? "black" : "red")};
+`;
+
+export const ChordLine: React.FC<ChordLineProps> = ({
   repLevel,
   chords,
   currentChordIndex,
@@ -238,9 +254,9 @@ export function ChordLine({
   showOnlyLastRep = false,
   directIndex = null,
   verticalOffset = 0,
-  totalWidth, // New prop
-  totalHeight, // Add this prop
-}: ChordLineProps & { totalWidth?: number; totalHeight?: number }) {
+  totalWidth = 0,
+  totalHeight = 0,
+}) => {
   console.log("ChordLine rendered with:", {
     repLevel,
     currentChordIndex,
@@ -338,7 +354,7 @@ export function ChordLine({
       {chords.map(renderChord)}
     </div>
   );
-}
+};
 
 const getChordLevel = (
   chord: SquashedChordInfo,
