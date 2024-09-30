@@ -8,14 +8,14 @@ import {
 import styled from "styled-components";
 
 // Add these constants at the top of the file, after the imports
-const CHORD_WIDTH = 12;
-const GAP_WIDTH = 12;
-const CHORD_VERTICAL_OFFSET = 15;
-const ROOT_DIFFERENCE_OFFSET = -1;
+const CHORD_WIDTH = 14; // 12 * 1.5
+const GAP_WIDTH = 18; // 12 * 1.5
+const CHORD_VERTICAL_OFFSET = 22.5; // 15 * 1.5
+const ROOT_DIFFERENCE_OFFSET = -1.5; // -1 * 1.5
 
 // Add these constants at the top of the file
-const BASE_CHORD_HEIGHT = 30;
-const ADDITIONAL_PADDING = 20;
+const BASE_CHORD_HEIGHT = 45; // 30 * 1.5
+const ADDITIONAL_PADDING = 30; // 20 * 1.5
 
 // Add this new constant
 const CHORD_LEVEL = {
@@ -87,7 +87,7 @@ const ChordRoot = styled.div`
 `;
 
 const ChordSuffix = styled.div`
-  font-size: 0.8em;
+  font-size: 1.2em; // 0.8 * 1.5
   font-weight: bold;
   display: flex;
   align-items: baseline;
@@ -108,7 +108,7 @@ const RootDifference = styled.span<{
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 0.8em;
+  font-size: 1.2em; // 0.8 * 1.5
   background-color: ${(props) => props.$backgroundColor};
   color: ${(props) => props.$color};
   font-weight: bold;
@@ -185,9 +185,9 @@ const FormattedChordSuffix: React.FC<{ suffix: string }> = ({ suffix }) => {
         height: "100%",
       }}
     >
-      <span style={{ lineHeight: "1" }}>{prefix}</span>
+      <span style={{ lineHeight: "1.5" }}>{prefix}</span>
       {postfix && (
-        <span style={{ fontSize: "0.7em", color: "gray", lineHeight: "1" }}>
+        <span style={{ fontSize: "1.05em", color: "gray", lineHeight: "1.5" }}>
           {postfix}
         </span>
       )}
@@ -268,10 +268,10 @@ const ChordBox = styled.div<{
   $isAvailable: boolean;
 }>`
   display: inline-block;
-  padding: 2px 4px;
-  margin: 2px;
-  border: 1px solid ${(props) => (props.$isAvailable ? "#ccc" : "red")};
-  border-radius: 4px;
+  padding: 3px 6px; // 2px 4px * 1.5
+  margin: 3px; // 2px * 1.5
+  border: 1.5px solid ${(props) => (props.$isAvailable ? "#ccc" : "red")}; // 1px * 1.5
+  border-radius: 6px; // 4px * 1.5
   cursor: pointer;
   background-color: ${(props) =>
     props.$isHighlighted ? "yellow" : props.$isHovered ? "#f0f0f0" : "white"};
@@ -422,7 +422,7 @@ const renderRootDifference = (
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "0.8em",
+          fontSize: "1.2em", // 0.8 * 1.5
           fontWeight: "bold",
         }}
       >
@@ -456,7 +456,9 @@ const RootDifferenceLegend: React.FC = () => {
   const differences = [1, -1, 2, -2, 3, -3, 4, -4, 5, -5, 6];
 
   return (
-    <span style={{ marginLeft: "10px" }}>
+    <span style={{ marginLeft: "15px" }}>
+      {" "}
+      // 10px * 1.5
       {differences.map((diff) => {
         const { backgroundColor, color, shape } = getRootDifferenceColor(diff);
         return (
@@ -466,18 +468,18 @@ const RootDifferenceLegend: React.FC = () => {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "20px",
-              height: "20px",
+              width: "30px", // 20px * 1.5
+              height: "30px", // 20px * 1.5
               backgroundColor,
               color,
-              fontSize: "0.8em",
+              fontSize: "1.2em", // 0.8 * 1.5
               fontWeight: "bold",
               ...(shape === "triangle-right"
                 ? { clipPath: "polygon(0% 0%, 0% 100%, 100% 50%)" }
                 : shape === "triangle-left"
                 ? { clipPath: "polygon(100% 0%, 100% 100%, 0% 50%)" }
                 : { borderRadius: "50%" }),
-              marginRight: "2px",
+              marginRight: "3px", // 2px * 1.5
             }}
           >
             {diff === 0 ? "=" : diff}
@@ -567,7 +569,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
           />
         ) : (
           <>
-            <div style={{ marginBottom: "60px" }}>
+            <div style={{ marginBottom: "90px" }}>
+              {" "}
+              // 60px * 1.5
               <ChordLine
                 repLevel={1}
                 chords={parsedChords.map((chord, index) => ({
@@ -584,7 +588,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 totalHeight={totalHeight}
               />
             </div>
-            <div style={{ marginBottom: "60px" }}>
+            <div style={{ marginBottom: "90px" }}>
+              {" "}
+              // 60px * 1.5
               <ChordLine
                 repLevel={3}
                 chords={squashedChords}
@@ -597,7 +603,9 @@ const AlternativeChordRepresentation: React.FC<Props> = ({
                 totalHeight={totalHeight}
               />
             </div>
-            <div style={{ marginBottom: "60px" }}>
+            <div style={{ marginBottom: "90px" }}>
+              {" "}
+              // 60px * 1.5
               <ChordLine
                 repLevel={4}
                 chords={squashedChords}
