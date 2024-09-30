@@ -105,8 +105,7 @@ const RootDifference = styled.span<{
   left: ${(props) => props.$left}px;
   top: 0px;
   width: ${GAP_WIDTH}px;
-  height: ${(props) =>
-    props.$shape === "circle" ? GAP_WIDTH : GAP_WIDTH * 1.5}px;
+  height: ${GAP_WIDTH}px; // Change this to always be GAP_WIDTH
   display: flex;
   align-items: center;
   justify-content: ${(props) =>
@@ -431,7 +430,7 @@ const renderRootDifference = (
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: "1.2em", // 0.8 * 1.5
+          fontSize: "1.2em",
           fontWeight: "bold",
         }}
       >
@@ -445,8 +444,6 @@ const renderRootDifference = (
       ? { backgroundColor: "gray", color: "white", shape: "circle" as const }
       : getRootDifferenceColor(parseInt(difference, 10));
 
-  const isTriangle = shape === "triangle-right" || shape === "triangle-left";
-
   return (
     <RootDifference
       $backgroundColor={backgroundColor}
@@ -456,11 +453,7 @@ const renderRootDifference = (
       $clipPath={clipPath}
       $textAlign={textAlign}
       style={{
-        top: `${
-          averageLevel +
-          ROOT_DIFFERENCE_OFFSET -
-          (isTriangle ? GAP_WIDTH * 0.25 : 0)
-        }px`,
+        top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
       }}
     >
       {difference}
@@ -474,10 +467,9 @@ const RootDifferenceLegend: React.FC = () => {
 
   return (
     <span style={{ marginLeft: "15px" }}>
-      {" "}
-      // 10px * 1.5
       {differences.map((diff) => {
-        const { backgroundColor, color, shape } = getRootDifferenceColor(diff);
+        const { backgroundColor, color, shape, clipPath } =
+          getRootDifferenceColor(diff);
         return (
           <span
             key={diff}
@@ -485,18 +477,15 @@ const RootDifferenceLegend: React.FC = () => {
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              width: "30px", // 20px * 1.5
-              height: "30px", // 20px * 1.5
+              width: "30px",
+              height: "30px",
               backgroundColor,
               color,
-              fontSize: "1.2em", // 0.8 * 1.5
+              fontSize: "1.2em",
               fontWeight: "bold",
-              ...(shape === "triangle-right"
-                ? { clipPath: "polygon(0% 0%, 0% 100%, 100% 50%)" }
-                : shape === "triangle-left"
-                ? { clipPath: "polygon(100% 0%, 100% 100%, 0% 50%)" }
-                : { borderRadius: "50%" }),
-              marginRight: "3px", // 2px * 1.5
+              clipPath: clipPath,
+              ...(shape === "circle" ? { borderRadius: "50%" } : {}),
+              marginRight: "3px",
             }}
           >
             {diff === 0 ? "=" : diff}
