@@ -48,42 +48,31 @@ export function getRootDifference(root1: string, root2: string): string {
   return difference.toString();
 }
 
-export function getRootDifferenceColor(difference: number): string {
+export function getRootDifferenceColor(difference: number): {
+  backgroundColor: string;
+  color: string;
+} {
   if (isNaN(difference)) {
-    return "gray";
+    return { backgroundColor: "gray", color: "white" };
   }
 
-  const colorMap: { [key: string]: string } = {
-    1: "#ff0000", // Dark Red
-    2: "#008c00", // Dark Green (20% lighter)
-    3: "#0000AB", // Dark Blue
-    4: "#FFA500", // Orange
-    5: "#000000", // Black
-    "-5": "#aaa", // Gray
-    "-4": "#FFFF00", // Yellow
-    "-3": "#5ED0FF", // Light Blue (Dodger Blue)
-    "-2": "#90EE90", // Light Green
-    "-1": "#FFB6C1", // Rose Pink
-    "6": "turquoise",
+  const colorMap: {
+    [key: string]: { backgroundColor: string; color: string };
+  } = {
+    1: { backgroundColor: "#ff0000", color: "white" }, // Dark Red
+    2: { backgroundColor: "#008c00", color: "white" }, // Dark Green
+    3: { backgroundColor: "#0000AB", color: "white" }, // Dark Blue
+    4: { backgroundColor: "#FFA500", color: "white" }, // Orange
+    5: { backgroundColor: "#000000", color: "white" }, // Black
+    "6": { backgroundColor: "#800020", color: "white" },
+    "-5": { backgroundColor: "#ccc", color: "black" }, // Gray
+    "-4": { backgroundColor: "#FFFF00", color: "black" }, // Yellow
+    "-3": { backgroundColor: "#6EE0FF", color: "black" }, // Light Blue (Dodger Blue)
+    "-2": { backgroundColor: "#90EE90", color: "black" }, // Light Green
+    "-1": { backgroundColor: "#FFB6C1", color: "black" }, // Rose Pink
   };
 
-  return colorMap[difference] || "black";
-}
-
-export function getContrastColor(hexColor: string): string {
-  // Remove the hash if it's there
-  hexColor = hexColor.replace("#", "");
-
-  // Convert to RGB
-  const r = parseInt(hexColor.substr(0, 2), 16);
-  const g = parseInt(hexColor.substr(2, 2), 16);
-  const b = parseInt(hexColor.substr(4, 2), 16);
-
-  // Calculate luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-
-  // Return black for bright colors and white for dark colors
-  return luminance > 0.5 ? "#000000" : "#FFFFFF";
+  return colorMap[difference] || { backgroundColor: "black", color: "white" };
 }
 
 export function getRootDifferenceSymbol(difference: number): string {

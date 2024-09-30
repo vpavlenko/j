@@ -3,7 +3,7 @@ import { ParsedChord, parseChordName } from "../helpers/chordParser";
 import {
   getRootDifference,
   getRootDifferenceColor,
-  getContrastColor,
+  // Remove getContrastColor import
 } from "../utils";
 import styled from "styled-components";
 
@@ -93,7 +93,11 @@ const ChordSuffix = styled.div`
   align-items: baseline;
 `;
 
-const RootDifference = styled.span<{ $backgroundColor: string; $left: number }>`
+const RootDifference = styled.span<{
+  $backgroundColor: string;
+  $color: string;
+  $left: number;
+}>`
   position: absolute;
   left: ${(props) => props.$left}px;
   top: 0px;
@@ -105,7 +109,7 @@ const RootDifference = styled.span<{ $backgroundColor: string; $left: number }>`
   text-align: center;
   font-size: 0.8em;
   background-color: ${(props) => props.$backgroundColor};
-  color: ${(props) => getContrastColor(props.$backgroundColor)};
+  color: ${(props) => props.$color};
   font-weight: bold;
   border-radius: 50%;
 `;
@@ -413,14 +417,15 @@ const renderRootDifference = (
     );
   }
 
-  const backgroundColor =
+  const { backgroundColor, color } =
     difference === "?"
-      ? "gray"
+      ? { backgroundColor: "gray", color: "white" }
       : getRootDifferenceColor(parseInt(difference, 10));
 
   return (
     <RootDifference
       $backgroundColor={backgroundColor}
+      $color={color}
       $left={left}
       style={{
         top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
@@ -438,9 +443,7 @@ const RootDifferenceLegend: React.FC = () => {
   return (
     <span style={{ marginLeft: "10px" }}>
       {differences.map((diff) => {
-        const backgroundColor =
-          diff === 0 ? "transparent" : getRootDifferenceColor(diff);
-        const color = diff === 0 ? "black" : getContrastColor(backgroundColor);
+        const { backgroundColor, color } = getRootDifferenceColor(diff);
         return (
           <span
             key={diff}
