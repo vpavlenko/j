@@ -879,7 +879,8 @@ const SongPreviewComponent: React.FC<{
 
 const SongPreviewContainer = styled.div<{ height: number }>`
   height: ${(props) => props.height}px;
-  overflow: hidden;
+  overflow: visible;
+  margin-top: 10px;
 `;
 
 const ErrorChords = styled.div`
