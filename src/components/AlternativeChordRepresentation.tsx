@@ -98,30 +98,35 @@ const RootDifference = styled.span<{
   $color: string;
   $left: number;
   $shape: "circle" | "triangle-right" | "triangle-left";
+  $clipPath?: string;
 }>`
   position: absolute;
   left: ${(props) => props.$left}px;
   top: 0px;
   width: ${GAP_WIDTH}px;
-  height: ${GAP_WIDTH}px;
+  height: ${(props) =>
+    props.$shape === "circle"
+      ? GAP_WIDTH
+      : GAP_WIDTH * 1.5}px; // Increase height by 50% only for triangles
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 1.2em; // 0.8 * 1.5
+  font-size: 1.2em;
   background-color: ${(props) => props.$backgroundColor};
   color: ${(props) => props.$color};
   font-weight: bold;
+  overflow: visible; // Allow overflow
   ${(props) => {
     switch (props.$shape) {
       case "triangle-right":
-        return `
-          clip-path: polygon(0% 0%, 0% 100%, 100% 50%);
-        `;
+        return `clip-path: ${
+          props.$clipPath || "polygon(0% 0%, 0% 100%, 100% 50%)"
+        };`;
       case "triangle-left":
-        return `
-          clip-path: polygon(100% 0%, 100% 100%, 0% 50%);
-        `;
+        return `clip-path: ${
+          props.$clipPath || "polygon(100% 0%, 100% 100%, 0% 50%)"
+        };`;
       default:
         return `border-radius: 50%;`;
     }
@@ -431,10 +436,12 @@ const renderRootDifference = (
     );
   }
 
-  const { backgroundColor, color, shape } =
+  const { backgroundColor, color, shape, clipPath } =
     difference === "?"
       ? { backgroundColor: "gray", color: "white", shape: "circle" as const }
       : getRootDifferenceColor(parseInt(difference, 10));
+
+  const isTriangle = shape === "triangle-right" || shape === "triangle-left";
 
   return (
     <RootDifference
@@ -442,8 +449,13 @@ const renderRootDifference = (
       $color={color}
       $left={left}
       $shape={shape}
+      $clipPath={clipPath}
       style={{
-        top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
+        top: `${
+          averageLevel +
+          ROOT_DIFFERENCE_OFFSET -
+          (isTriangle ? GAP_WIDTH * 0.25 : 0)
+        }px`, // Adjust top position only for triangles
       }}
     >
       {difference}
