@@ -51,28 +51,39 @@ export function getRootDifference(root1: string, root2: string): string {
 export function getRootDifferenceColor(difference: number): {
   backgroundColor: string;
   color: string;
+  shape: "circle" | "triangle-right" | "triangle-left";
 } {
   if (isNaN(difference)) {
-    return { backgroundColor: "gray", color: "white" };
+    return { backgroundColor: "gray", color: "white", shape: "circle" };
   }
 
   const colorMap: {
-    [key: string]: { backgroundColor: string; color: string };
+    [key: string]: {
+      backgroundColor: string;
+      color: string;
+      shape: "circle" | "triangle-right" | "triangle-left";
+    };
   } = {
-    1: { backgroundColor: "#ff0000", color: "white" }, // Dark Red
-    2: { backgroundColor: "#008c00", color: "white" }, // Dark Green
-    3: { backgroundColor: "#0000AB", color: "white" }, // Dark Blue
-    4: { backgroundColor: "#FFA500", color: "white" }, // Orange
-    5: { backgroundColor: "#000000", color: "white" }, // Black
-    "6": { backgroundColor: "#800020", color: "white" },
-    "-5": { backgroundColor: "#ccc", color: "black" }, // Gray
-    "-4": { backgroundColor: "#FFFF00", color: "black" }, // Yellow
-    "-3": { backgroundColor: "#6EE0FF", color: "black" }, // Light Blue (Dodger Blue)
-    "-2": { backgroundColor: "#90EE90", color: "black" }, // Light Green
-    "-1": { backgroundColor: "#FFB6C1", color: "black" }, // Rose Pink
+    1: { backgroundColor: "#ff0000", color: "white", shape: "circle" }, // Dark Red
+    2: { backgroundColor: "#008c00", color: "white", shape: "circle" }, // Dark Green
+    3: { backgroundColor: "#0000AB", color: "white", shape: "circle" }, // Dark Blue
+    4: { backgroundColor: "#FFA500", color: "white", shape: "circle" }, // Orange
+    5: { backgroundColor: "#000000", color: "white", shape: "triangle-right" }, // Black, triangle pointing right
+    "6": { backgroundColor: "#800020", color: "white", shape: "circle" },
+    "-5": { backgroundColor: "#ccc", color: "black", shape: "triangle-left" }, // Gray, triangle pointing left
+    "-4": { backgroundColor: "#FFFF00", color: "black", shape: "circle" }, // Yellow
+    "-3": { backgroundColor: "#6EE0FF", color: "black", shape: "circle" }, // Light Blue (Dodger Blue)
+    "-2": { backgroundColor: "#90EE90", color: "black", shape: "circle" }, // Light Green
+    "-1": { backgroundColor: "#FFB6C1", color: "black", shape: "circle" }, // Rose Pink
   };
 
-  return colorMap[difference] || { backgroundColor: "black", color: "white" };
+  return (
+    colorMap[difference] || {
+      backgroundColor: "black",
+      color: "white",
+      shape: "circle",
+    }
+  );
 }
 
 export function getRootDifferenceSymbol(difference: number): string {

@@ -97,6 +97,7 @@ const RootDifference = styled.span<{
   $backgroundColor: string;
   $color: string;
   $left: number;
+  $shape: "circle" | "triangle-right" | "triangle-left";
 }>`
   position: absolute;
   left: ${(props) => props.$left}px;
@@ -111,7 +112,20 @@ const RootDifference = styled.span<{
   background-color: ${(props) => props.$backgroundColor};
   color: ${(props) => props.$color};
   font-weight: bold;
-  border-radius: 50%;
+  ${(props) => {
+    switch (props.$shape) {
+      case "triangle-right":
+        return `
+          clip-path: polygon(0% 0%, 0% 100%, 100% 50%);
+        `;
+      case "triangle-left":
+        return `
+          clip-path: polygon(100% 0%, 100% 100%, 0% 50%);
+        `;
+      default:
+        return `border-radius: 50%;`;
+    }
+  }}
 `;
 
 export interface ChordInfo {
@@ -417,9 +431,9 @@ const renderRootDifference = (
     );
   }
 
-  const { backgroundColor, color } =
+  const { backgroundColor, color, shape } =
     difference === "?"
-      ? { backgroundColor: "gray", color: "white" }
+      ? { backgroundColor: "gray", color: "white", shape: "circle" as const }
       : getRootDifferenceColor(parseInt(difference, 10));
 
   return (
@@ -427,6 +441,7 @@ const renderRootDifference = (
       $backgroundColor={backgroundColor}
       $color={color}
       $left={left}
+      $shape={shape}
       style={{
         top: `${averageLevel + ROOT_DIFFERENCE_OFFSET}px`,
       }}
@@ -443,7 +458,7 @@ const RootDifferenceLegend: React.FC = () => {
   return (
     <span style={{ marginLeft: "10px" }}>
       {differences.map((diff) => {
-        const { backgroundColor, color } = getRootDifferenceColor(diff);
+        const { backgroundColor, color, shape } = getRootDifferenceColor(diff);
         return (
           <span
             key={diff}
@@ -457,7 +472,11 @@ const RootDifferenceLegend: React.FC = () => {
               color,
               fontSize: "0.8em",
               fontWeight: "bold",
-              borderRadius: diff === 0 ? "none" : "50%",
+              ...(shape === "triangle-right"
+                ? { clipPath: "polygon(0% 0%, 0% 100%, 100% 50%)" }
+                : shape === "triangle-left"
+                ? { clipPath: "polygon(100% 0%, 100% 100%, 0% 50%)" }
+                : { borderRadius: "50%" }),
               marginRight: "2px",
             }}
           >
